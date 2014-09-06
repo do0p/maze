@@ -4,11 +4,9 @@ import static at.brandl.maze.generator.Direction.EAST;
 import static at.brandl.maze.generator.Direction.NORTH;
 import static at.brandl.maze.generator.Direction.SOUTH;
 import static at.brandl.maze.generator.Direction.WEST;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import at.brandl.maze.generator.Path.Section;
@@ -101,6 +99,7 @@ public class PathTest {
 		path.connect(NORTH, section);
 		assertSame(section, path.getEnd().getNeighbour(NORTH));
 		assertSame(path.getEnd(), section.getNeighbour(SOUTH));
+
 	}
 
 }
