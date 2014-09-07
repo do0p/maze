@@ -8,6 +8,7 @@ import static at.brandl.games.commons.Orientation.WEST;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -183,6 +184,19 @@ public class Board<T extends FieldContent<T>> {
 				field.clear();
 			}
 		}
+	}
+
+	public Collection<Field<T>> getEmptyFields() {
+		
+		Collection<Field<T>> emptyFields = new LinkedList<Board.Field<T>>();
+		for (Map<Integer, Field<T>> row : fields.values()) {
+			for (Field<T> field : row.values()) {
+				if(field.isEmpty()) {
+					emptyFields.add(field);
+				}
+			}
+		}
+		return emptyFields;
 	}
 	
 

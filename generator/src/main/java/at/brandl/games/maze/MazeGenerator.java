@@ -5,6 +5,7 @@ import static at.brandl.games.commons.Direction.LEFT;
 import static at.brandl.games.commons.Direction.RIGHT;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -64,16 +65,34 @@ public class MazeGenerator {
 	public void generate() {
 
 		// create solution path
-		Queue<Path> branches = createSolutionPath();
+		Collection<Path> branches = createSolutionPath();
 
 		// create branches
 		createBranches(branches);
 
 		// fill empty spots
+		Iterator<Field<Section>> iterator = board.getEmptyFields().iterator();
+		while(iterator.hasNext()) {
+			Field<Section> field = board.getEmptyFields().iterator().next();
+			Map<Orientation, Field<Section>> nonEmptyNeighbours = field.getNonEmptyNeighbours();
+			if(!nonEmptyNeighbours.isEmpty()) {
+				Entry<Orientation, Field<Section>> neighbour = nonEmptyNeighbours.entrySet().iterator().next();
+				Path path = new Path(neighbour.getKey().opposite());
+				field.setContent(path.getStart());
+				path.connect(neighbour.getKey(), neighbour.getValue().getContent());
+				boolean advanced = false;
+				do {
+					advanced = advance(path, branches);
+					createBranches(branches);
+				} while(advanced);
+				iterator = board.getEmptyFields().iterator();
+			}
+		}
+		
 		System.out.println(board);
 	}
 
-	private void createBranches(Queue<Path> branches) {
+	private void createBranches(Collection<Path> branches) {
 		while (!branches.isEmpty()) {
 			Iterator<Path> iterator = branches.iterator();
 			while (iterator.hasNext()) {
@@ -141,7 +160,7 @@ public class MazeGenerator {
 		return branches;
 	}
 
-	private boolean advance(Path path, Queue<Path> branches) {
+	private boolean advance(Path path, Collection<Path> branches) {
 
 		Collections.shuffle(turns);
 
