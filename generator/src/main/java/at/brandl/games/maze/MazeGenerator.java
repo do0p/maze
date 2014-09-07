@@ -1,4 +1,4 @@
-package at.brandl.maze.generator;
+package at.brandl.games.maze;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Direction;
 import at.brandl.games.commons.Board.Field;
-import at.brandl.maze.generator.Path.Section;
+import at.brandl.games.maze.Path.Section;
 
 public class MazeGenerator {
 

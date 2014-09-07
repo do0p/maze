@@ -1,8 +1,9 @@
-package at.brandl.maze.generator;
+package at.brandl.games.maze;
 
 import org.junit.Test;
 
 import at.brandl.games.commons.Board;
+import at.brandl.games.maze.MazeGenerator;
 
 public class MazeGeneratorTest {
 

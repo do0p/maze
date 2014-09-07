@@ -4,7 +4,10 @@ import static at.brandl.games.commons.Direction.EAST;
 import static at.brandl.games.commons.Direction.NORTH;
 import static at.brandl.games.commons.Direction.SOUTH;
 import static at.brandl.games.commons.Direction.WEST;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Map;
@@ -13,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.brandl.games.commons.Board.Field;
-import at.brandl.maze.generator.Path.Section;
+import at.brandl.games.commons.Board.FieldNotFoundException;
 
 public class BoardTest {
 

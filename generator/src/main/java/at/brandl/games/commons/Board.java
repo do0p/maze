@@ -11,9 +11,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
-
 public class Board<T> {
+	public static class FieldNotFoundException extends RuntimeException {
+
+		public FieldNotFoundException(int row, int column) {
+			super("No field with row " + row + " and column " + column + ".");
+		}
+
+		private static final long serialVersionUID = 9029363192147747391L;
+
+	}
+
+	public static class IllegalBoardExcption extends RuntimeException {
+
+		private static final long serialVersionUID = 5950890814540190627L;
+
+	}
+	
 	public static class Field<T> {
 
 		private final Map<Direction, Board.Field<T>> neighbours = new HashMap<Direction, Board.Field<T>>();
@@ -35,8 +49,9 @@ public class Board<T> {
 		}
 
 		public void setContent(T content) {
-			if(!isEmpty()){
-				throw new IllegalStateException("field already contains a section." );
+			if (!isEmpty()) {
+				throw new IllegalStateException(
+						"field already contains a section.");
 			}
 			this.content = content;
 		}
@@ -55,19 +70,19 @@ public class Board<T> {
 		}
 
 		public Map<Direction, Field<T>> getNeighbours() {
-			return neighbours ;
+			return neighbours;
 		}
-		
+
 		public Map<Direction, Field<T>> getNonEmptyNeighbours() {
 			Map<Direction, Field<T>> nonEmptyNeighbours = new HashMap<Direction, Board.Field<T>>();
-			for(Entry<Direction, Field<T>> entry : neighbours.entrySet()) {
-				if(!entry.getValue().isEmpty()){
+			for (Entry<Direction, Field<T>> entry : neighbours.entrySet()) {
+				if (!entry.getValue().isEmpty()) {
 					nonEmptyNeighbours.put(entry.getKey(), entry.getValue());
 				}
 			}
 			return nonEmptyNeighbours;
 		}
-		
+
 		private void addNeighbour(Direction direction, Field<T> field) {
 			Field<T> previous = neighbours.put(direction, field);
 			if (previous != null) {
@@ -87,11 +102,11 @@ public class Board<T> {
 			Map<Integer, Field<T>> rowValues = new HashMap<Integer, Board.Field<T>>();
 			for (int column = 0; column < numColumns; column++) {
 				Field<T> field = new Field<T>(row, column);
-				if(column > 0) {
+				if (column > 0) {
 					field.addNeighbour(WEST, rowValues.get(column - 1));
 				}
-				if(row > 0) {
-					field.addNeighbour(NORTH, fields.get(row -1).get(column));
+				if (row > 0) {
+					field.addNeighbour(NORTH, fields.get(row - 1).get(column));
 				}
 				rowValues.put(column, field);
 			}
@@ -142,8 +157,5 @@ public class Board<T> {
 		}
 		return borders;
 	}
-	
 
-
-	
 }
