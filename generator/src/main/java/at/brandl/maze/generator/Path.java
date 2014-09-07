@@ -3,8 +3,6 @@ package at.brandl.maze.generator;
 import java.util.HashMap;
 import java.util.Map;
 
-import at.brandl.maze.generator.Path.Section;
-
 public class Path {
 
 	public static class Section {
