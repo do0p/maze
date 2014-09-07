@@ -54,6 +54,7 @@ public class Path {
 			return field;
 		}
 
+		@SuppressWarnings("unchecked")
 		public void setField(Field<? extends FieldContent<Section>> field) {
 			this.field = (Field<Section>) field;
 			
@@ -107,5 +108,6 @@ public class Path {
 	public Orientation getCurrentDirection() {
 		return currentDirection;
 	}
+
 
 }

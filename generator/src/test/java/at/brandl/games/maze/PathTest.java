@@ -1,4 +1,5 @@
 package at.brandl.games.maze;
+
 import static at.brandl.games.commons.Direction.AHEAD;
 import static at.brandl.games.commons.Direction.LEFT;
 import static at.brandl.games.commons.Direction.RIGHT;
@@ -113,6 +114,7 @@ public class PathTest {
 		assertEquals(NORTH, path.go(AHEAD).getCurrentDirection());
 		assertEquals(WEST, path.go(LEFT).getCurrentDirection());
 		assertEquals(NORTH, path.go(RIGHT).getCurrentDirection());
+
 	}
 
 }

@@ -3,6 +3,7 @@ package at.brandl.games.maze;
 import org.junit.Test;
 
 import at.brandl.games.commons.Board;
+
 import at.brandl.games.maze.Path.Section;
 
 public class MazeGeneratorTest {
@@ -16,6 +17,7 @@ public class MazeGeneratorTest {
 		MazeGenerator mazeGenerator = new MazeGenerator(board);
 		mazeGenerator.setStart(0, COLUMNS / 2);
 		mazeGenerator.setEnd(ROWS - 1, COLUMNS / 2);
+
 		mazeGenerator.generate();
 	}
 

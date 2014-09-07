@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 public class Board<T extends FieldContent<T>> {
 	
 
+
 	public static class FieldNotFoundException extends RuntimeException {
 
 		public FieldNotFoundException(int row, int column) {
@@ -78,13 +79,16 @@ public class Board<T extends FieldContent<T>> {
 			return column;
 		}
 
+
 		public Map<Orientation, Field<T>> getNeighbours() {
+
 			return neighbours;
 		}
 
 		public Map<Orientation, Field<T>> getNonEmptyNeighbours() {
 			Map<Orientation, Field<T>> nonEmptyNeighbours = new HashMap<Orientation, Board.Field<T>>();
 			for (Entry<Orientation, Field<T>> entry : neighbours.entrySet()) {
+
 				if (!entry.getValue().isEmpty()) {
 					nonEmptyNeighbours.put(entry.getKey(), entry.getValue());
 				}
@@ -92,8 +96,10 @@ public class Board<T extends FieldContent<T>> {
 			return nonEmptyNeighbours;
 		}
 
+
 		private void addNeighbour(Orientation orientation, Field<T> field) {
 			Field<T> previous = neighbours.put(orientation, field);
+
 			if (previous != null) {
 				throw new IllegalBoardExcption();
 			}
@@ -170,6 +176,7 @@ public class Board<T extends FieldContent<T>> {
 		return borders;
 	}
 
+
 	public void clear() {
 		for (Map<Integer, Field<T>> row : fields.values()) {
 			for (Field<T> field : row.values()) {
@@ -178,4 +185,5 @@ public class Board<T extends FieldContent<T>> {
 		}
 	}
 	
+
 }

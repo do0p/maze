@@ -1,11 +1,12 @@
 package at.brandl.games.maze;
 
-import static at.brandl.games.commons.Direction.*;
+import static at.brandl.games.commons.Direction.AHEAD;
+import static at.brandl.games.commons.Direction.LEFT;
+import static at.brandl.games.commons.Direction.RIGHT;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,9 +15,9 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import at.brandl.games.commons.Board;
+import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Direction;
 import at.brandl.games.commons.Orientation;
-import at.brandl.games.commons.Board.Field;
 import at.brandl.games.maze.Path.Section;
 
 public class MazeGenerator {
@@ -181,6 +182,7 @@ public class MazeGenerator {
 					.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Entry<Orientation, Field<Section>> neighbour = iterator.next();
+
 
 				Section neighbourSection = neighbour.getValue().getContent();
 				if (!path.equals(neighbourSection.getPath())) {

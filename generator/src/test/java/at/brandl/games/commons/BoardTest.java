@@ -1,9 +1,11 @@
 package at.brandl.games.commons;
 
+
 import static at.brandl.games.commons.Orientation.EAST;
 import static at.brandl.games.commons.Orientation.NORTH;
 import static at.brandl.games.commons.Orientation.SOUTH;
 import static at.brandl.games.commons.Orientation.WEST;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
