@@ -1,9 +1,9 @@
 package at.brandl.games.commons;
 
-import static at.brandl.games.commons.Direction.EAST;
-import static at.brandl.games.commons.Direction.NORTH;
-import static at.brandl.games.commons.Direction.SOUTH;
-import static at.brandl.games.commons.Direction.WEST;
+import static at.brandl.games.commons.Orientation.EAST;
+import static at.brandl.games.commons.Orientation.NORTH;
+import static at.brandl.games.commons.Orientation.SOUTH;
+import static at.brandl.games.commons.Orientation.WEST;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,7 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Board<T> {
+
+
+public class Board<T extends FieldContent<T>> {
+	
+
 	public static class FieldNotFoundException extends RuntimeException {
 
 		public FieldNotFoundException(int row, int column) {
@@ -28,9 +32,9 @@ public class Board<T> {
 
 	}
 
-	public static class Field<T> {
+	public static class Field<T extends FieldContent<T>> {
 
-		private final Map<Direction, Board.Field<T>> neighbours = new HashMap<Direction, Board.Field<T>>();
+		private final Map<Orientation, Board.Field<T>> neighbours = new HashMap<Orientation, Board.Field<T>>();
 		private final int row;
 		private final int column;
 		private T content;
@@ -58,6 +62,7 @@ public class Board<T> {
 						"field already contains a section.");
 			}
 			this.content = content;
+			content.setField(this);
 		}
 
 		@Override
@@ -73,13 +78,13 @@ public class Board<T> {
 			return column;
 		}
 
-		public Map<Direction, Field<T>> getNeighbours() {
+		public Map<Orientation, Field<T>> getNeighbours() {
 			return neighbours;
 		}
 
-		public Map<Direction, Field<T>> getNonEmptyNeighbours() {
-			Map<Direction, Field<T>> nonEmptyNeighbours = new HashMap<Direction, Board.Field<T>>();
-			for (Entry<Direction, Field<T>> entry : neighbours.entrySet()) {
+		public Map<Orientation, Field<T>> getNonEmptyNeighbours() {
+			Map<Orientation, Field<T>> nonEmptyNeighbours = new HashMap<Orientation, Board.Field<T>>();
+			for (Entry<Orientation, Field<T>> entry : neighbours.entrySet()) {
 				if (!entry.getValue().isEmpty()) {
 					nonEmptyNeighbours.put(entry.getKey(), entry.getValue());
 				}
@@ -87,12 +92,12 @@ public class Board<T> {
 			return nonEmptyNeighbours;
 		}
 
-		private void addNeighbour(Direction direction, Field<T> field) {
-			Field<T> previous = neighbours.put(direction, field);
+		private void addNeighbour(Orientation orientation, Field<T> field) {
+			Field<T> previous = neighbours.put(orientation, field);
 			if (previous != null) {
 				throw new IllegalBoardExcption();
 			}
-			field.neighbours.put(direction.opposite(), this);
+			field.neighbours.put(orientation.opposite(), this);
 
 		}
 
@@ -145,8 +150,8 @@ public class Board<T> {
 		return board.toString();
 	}
 
-	public Collection<Direction> getBorders(Field<T> field) {
-		Collection<Direction> borders = new ArrayList<Direction>();
+	public Collection<Orientation> getBorders(Field<T> field) {
+		Collection<Orientation> borders = new ArrayList<Orientation>();
 		if (field.getRow() == 0) {
 			borders.add(NORTH);
 		}

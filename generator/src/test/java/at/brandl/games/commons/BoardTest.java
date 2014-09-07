@@ -1,9 +1,9 @@
 package at.brandl.games.commons;
 
-import static at.brandl.games.commons.Direction.EAST;
-import static at.brandl.games.commons.Direction.NORTH;
-import static at.brandl.games.commons.Direction.SOUTH;
-import static at.brandl.games.commons.Direction.WEST;
+import static at.brandl.games.commons.Orientation.EAST;
+import static at.brandl.games.commons.Orientation.NORTH;
+import static at.brandl.games.commons.Orientation.SOUTH;
+import static at.brandl.games.commons.Orientation.WEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -20,20 +20,39 @@ import at.brandl.games.commons.Board.FieldNotFoundException;
 
 public class BoardTest {
 
+	private static class Content implements FieldContent<Content> {
+
+		private Field<? extends FieldContent<Content>> field;
+
+		public Field<? extends FieldContent<Content>> getField() {
+			return field;
+		}
+
+		public void setField(Field<? extends FieldContent<Content>> field) {
+			this.field = field;
+			
+		}
+
+
+		
+	}
+	
 	private static final int WIDTH = 10;
 	private static final int HEIGHT = 12;
-	private Board<Object> board;
+	private Board<Content> board;
+	
+	
 
 	@Before
 	public void setUp() {
-		board = new Board<Object>(WIDTH, HEIGHT);
+		board = new Board<Content>(WIDTH, HEIGHT);
 	}
 
 	@Test
 	public void field() {
 		for (int row = 0; row < HEIGHT; row++) {
 			for (int column = 0; column < WIDTH; column++) {
-				Field<Object> field = board.getField(row, column);
+				Field<Content> field = board.getField(row, column);
 				assertEquals(row, field.getRow());
 				assertEquals(column, field.getColumn());
 
@@ -45,7 +64,7 @@ public class BoardTest {
 	public void neighbours() {
 		int row = 1;
 		int column = 1;
-		Map<Direction, Field<Object>> neighbours = board.getField(row, column)
+		Map<Orientation, Field<Content>> neighbours = board.getField(row, column)
 				.getNeighbours();
 
 		assertEquals(4, neighbours.size());
@@ -59,7 +78,7 @@ public class BoardTest {
 	public void neighboursInNorthWest() {
 		int row = 0;
 		int column = 0;
-		Map<Direction, Field<Object>> neighbours = board.getField(row, column)
+		Map<Orientation, Field<Content>> neighbours = board.getField(row, column)
 				.getNeighbours();
 
 		assertEquals(2, neighbours.size());
@@ -72,7 +91,7 @@ public class BoardTest {
 	public void neighboursInSouthEeast() {
 		int row = HEIGHT - 1;
 		int column = WIDTH - 1;
-		Map<Direction, Field<Object>> neighbours = board.getField(row, column)
+		Map<Orientation, Field<Content>> neighbours = board.getField(row, column)
 				.getNeighbours();
 
 		assertEquals(2, neighbours.size());
@@ -84,14 +103,14 @@ public class BoardTest {
 	public void nonEmptyNeighbours() {
 		int row = 1;
 		int column = 1;
-		Field<Object> field = board.getField(row, column);
-		Map<Direction, Field<Object>> neighbours = field
+		Field<Content> field = board.getField(row, column);
+		Map<Orientation, Field<Content>> neighbours = field
 				.getNeighbours();
 
-		Field<Object> northNeighbour = neighbours.get(NORTH);
-		northNeighbour.setContent(new Object());
+		Field<Content> northNeighbour = neighbours.get(NORTH);
+		northNeighbour.setContent(new Content());
 		
-		Map<Direction, Field<Object>> nonEmptyNeighbours = field.getNonEmptyNeighbours();
+		Map<Orientation, Field<Content>> nonEmptyNeighbours = field.getNonEmptyNeighbours();
 		assertEquals(1, nonEmptyNeighbours.size());
 		assertNorthNeighbour(nonEmptyNeighbours, row, column);
 		
@@ -99,9 +118,9 @@ public class BoardTest {
 	
 	@Test
 	public void section() {
-		Field<Object> field = board.getField(0, 0);
+		Field<Content> field = board.getField(0, 0);
 		assertTrue(field.isEmpty());
-		Object content = new Object();
+		Content content = new Content();
 		field.setContent(content);
 		assertFalse(field.isEmpty());
 		assertSame(content, field.getContent());
@@ -109,9 +128,9 @@ public class BoardTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void setSectionTwice() {
-		Field<Object> field = board.getField(0, 0);
-		field.setContent(new Object());
-		field.setContent(new Object());
+		Field<Content> field = board.getField(0, 0);
+		field.setContent(new Content());
+		field.setContent(new Content());
 	}
 
 	@Test(expected = FieldNotFoundException.class)
@@ -121,7 +140,7 @@ public class BoardTest {
 
 	@Test
 	public void northWest() {
-		Collection<Direction> borders = board.getBorders(board.getField(0, 0));
+		Collection<Orientation> borders = board.getBorders(board.getField(0, 0));
 		assertEquals(2, borders.size());
 		assertTrue(borders.contains(NORTH));
 		assertTrue(borders.contains(WEST));
@@ -129,37 +148,37 @@ public class BoardTest {
 
 	@Test
 	public void southEast() {
-		Collection<Direction> borders = board.getBorders(board.getField(
+		Collection<Orientation> borders = board.getBorders(board.getField(
 				HEIGHT - 1, WIDTH - 1));
 		assertEquals(2, borders.size());
 		assertTrue(borders.contains(EAST));
 		assertTrue(borders.contains(SOUTH));
 	}
 
-	private void assertWestNeighbour(Map<Direction, Field<Object>> neighbours, int row,
+	private void assertWestNeighbour(Map<Orientation, Field<Content>> neighbours, int row,
 			int column) {
-		Field<Object> westNeighbour = neighbours.get(WEST);
+		Field<Content> westNeighbour = neighbours.get(WEST);
 		assertEquals(row, westNeighbour.getRow());
 		assertEquals(column - 1, westNeighbour.getColumn());
 	}
 
-	private void assertNorthNeighbour(Map<Direction, Field<Object>> neighbours,
+	private void assertNorthNeighbour(Map<Orientation, Field<Content>> neighbours,
 			int row, int column) {
-		Field<Object> northNeighbour = neighbours.get(NORTH);
+		Field<Content> northNeighbour = neighbours.get(NORTH);
 		assertEquals(row - 1, northNeighbour.getRow());
 		assertEquals(column, northNeighbour.getColumn());
 	}
 
-	private void assertSouthNeighbour(Map<Direction, Field<Object>> neighbours,
+	private void assertSouthNeighbour(Map<Orientation, Field<Content>> neighbours,
 			int row, int column) {
-		Field<Object> southNeighbour = neighbours.get(SOUTH);
+		Field<Content> southNeighbour = neighbours.get(SOUTH);
 		assertEquals(row + 1, southNeighbour.getRow());
 		assertEquals(column, southNeighbour.getColumn());
 	}
 
-	private void assertEastNeighbour(Map<Direction, Field<Object>> neighbours, int row,
+	private void assertEastNeighbour(Map<Orientation, Field<Content>> neighbours, int row,
 			int column) {
-		Field<Object> eastNeighbour = neighbours.get(EAST);
+		Field<Content> eastNeighbour = neighbours.get(EAST);
 		assertEquals(row, eastNeighbour.getRow());
 		assertEquals(column + 1, eastNeighbour.getColumn());
 	}

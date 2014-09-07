@@ -1,9 +1,11 @@
 package at.brandl.games.maze;
-
-import static at.brandl.games.commons.Direction.EAST;
-import static at.brandl.games.commons.Direction.NORTH;
-import static at.brandl.games.commons.Direction.SOUTH;
-import static at.brandl.games.commons.Direction.WEST;
+import static at.brandl.games.commons.Direction.AHEAD;
+import static at.brandl.games.commons.Direction.LEFT;
+import static at.brandl.games.commons.Direction.RIGHT;
+import static at.brandl.games.commons.Orientation.EAST;
+import static at.brandl.games.commons.Orientation.NORTH;
+import static at.brandl.games.commons.Orientation.SOUTH;
+import static at.brandl.games.commons.Orientation.WEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -21,7 +23,7 @@ public class PathTest {
 		Path path = new Path(NORTH, first);
 		assertSame(first, path.getStart());
 
-		path.ahead();
+		path.go(AHEAD);
 		assertSame(first, path.getStart());
 	}
 
@@ -31,7 +33,7 @@ public class PathTest {
 		Path path = new Path(NORTH, first);
 		assertSame(first, path.getEnd());
 
-		path.ahead();
+		path.go(AHEAD);
 		assertSame(first.getNeighbour(NORTH), path.getEnd());
 	}
 
@@ -44,7 +46,7 @@ public class PathTest {
 		assertNull(start.getNeighbour(WEST));
 		assertNull(start.getNeighbour(SOUTH));
 
-		Section end = path.ahead().getEnd();
+		Section end = path.go(AHEAD).getEnd();
 		assertSame(end, start.getNeighbour(NORTH));
 		assertNull(start.getNeighbour(EAST));
 		assertNull(start.getNeighbour(WEST));
@@ -56,7 +58,7 @@ public class PathTest {
 		assertNull(end.getNeighbour(NORTH));
 
 		Section middle = end;
-		end = path.turnLeft().getEnd();
+		end = path.go(LEFT).getEnd();
 		assertSame(start, middle.getNeighbour(SOUTH));
 		assertSame(end, middle.getNeighbour(WEST));
 		assertNull(middle.getNeighbour(EAST));
@@ -74,7 +76,7 @@ public class PathTest {
 	public void junction() {
 		Path path = new Path(NORTH);
 
-		Path leftPath = path.createPathLeft();
+		Path leftPath = path.createPath(LEFT);
 		assertSame(path.getEnd(), leftPath.getStart().getNeighbour(EAST));
 	}
 	
@@ -82,16 +84,16 @@ public class PathTest {
 	public void junctionOnExistingJUnction() {
 		Path path = new Path(NORTH);
 
-		path.createPathLeft();
-		path.createPathLeft();
+		path.createPath(LEFT);
+		path.createPath(LEFT);
 	}
 	
 	@Test(expected = IllegalPathExcption.class)
 	public void pathOnExistingJunction() {
 		Path path = new Path(NORTH);
 
-		path.createPathLeft();
-		path.turnLeft();
+		path.createPath(LEFT)		;
+		path.go(LEFT);
 	}
 	
 	@Test
@@ -108,9 +110,9 @@ public class PathTest {
 	public void currentDirection()  {
 		Path path = new Path(NORTH);
 		assertEquals(NORTH, path.getCurrentDirection());
-		assertEquals(NORTH, path.ahead().getCurrentDirection());
-		assertEquals(WEST, path.turnLeft().getCurrentDirection());
-		assertEquals(NORTH, path.turnRight().getCurrentDirection());
+		assertEquals(NORTH, path.go(AHEAD).getCurrentDirection());
+		assertEquals(WEST, path.go(LEFT).getCurrentDirection());
+		assertEquals(NORTH, path.go(RIGHT).getCurrentDirection());
 	}
 
 }
