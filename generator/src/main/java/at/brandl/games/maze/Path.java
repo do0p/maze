@@ -1,4 +1,4 @@
-package at.brandl.maze.generator;
+package at.brandl.games.maze;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,12 @@ import at.brandl.games.commons.Direction;
 
 public class Path {
 
+	public static class IllegalPathExcption extends RuntimeException {
+
+		private static final long serialVersionUID = -6275090835845428411L;
+
+	}
+	
 	public static class Section {
 
 		private final Map<Direction, Section> neighbours = new HashMap<Direction, Path.Section>();
