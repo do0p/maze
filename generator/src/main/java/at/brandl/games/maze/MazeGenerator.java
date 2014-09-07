@@ -115,13 +115,13 @@ public class MazeGenerator {
 				Field<Section> currentStartPathField = start;
 				Orientation startBorder = board
 						.getBorders(currentStartPathField).iterator().next();
-				Path startPath = new Path(startBorder.opposite());
+				Path startPath = new Path(startBorder.opposite()).go(AHEAD);
 				currentStartPathField.setContent(startPath.getEnd());
 
 				Field<Section> currentEndPathField = end;
 				Orientation endBorder = board.getBorders(currentEndPathField)
 						.iterator().next();
-				Path endPath = new Path(endBorder.opposite());
+				Path endPath = new Path(endBorder.opposite()).go(AHEAD);
 				currentEndPathField.setContent(endPath.getEnd());
 
 				do {
