@@ -1,11 +1,10 @@
 package at.brandl.maze.generator;
 
-import static at.brandl.maze.generator.Direction.EAST;
-import static at.brandl.maze.generator.Direction.NORTH;
-import static at.brandl.maze.generator.Direction.SOUTH;
-import static at.brandl.maze.generator.Direction.WEST;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static at.brandl.games.commons.Direction.EAST;
+import static at.brandl.games.commons.Direction.NORTH;
+import static at.brandl.games.commons.Direction.SOUTH;
+import static at.brandl.games.commons.Direction.WEST;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -15,7 +14,7 @@ public class PathTest {
 
 	@Test
 	public void start() {
-		Section first = new Section();
+		Section first = new Section(null);
 		Path path = new Path(NORTH, first);
 		assertSame(first, path.getStart());
 
@@ -25,7 +24,7 @@ public class PathTest {
 
 	@Test
 	public void end() {
-		Section first = new Section();
+		Section first = new Section(null);
 		Path path = new Path(NORTH, first);
 		assertSame(first, path.getEnd());
 
@@ -35,7 +34,7 @@ public class PathTest {
 
 	@Test
 	public void neighbours() {
-		Path path = new Path(NORTH, new Section());
+		Path path = new Path(NORTH);
 		Section start = path.getStart();
 		assertNull(start.getNeighbour(NORTH));
 		assertNull(start.getNeighbour(EAST));
@@ -70,7 +69,7 @@ public class PathTest {
 
 	@Test
 	public void junction() {
-		Path path = new Path(NORTH, new Section());
+		Path path = new Path(NORTH);
 
 		Path leftPath = path.createPathLeft();
 		assertSame(path.getEnd(), leftPath.getStart().getNeighbour(EAST));
@@ -78,7 +77,7 @@ public class PathTest {
 	
 	@Test(expected = IllegalPathExcption.class)
 	public void junctionOnExistingJUnction() {
-		Path path = new Path(NORTH, new Section());
+		Path path = new Path(NORTH);
 
 		path.createPathLeft();
 		path.createPathLeft();
@@ -86,7 +85,7 @@ public class PathTest {
 	
 	@Test(expected = IllegalPathExcption.class)
 	public void pathOnExistingJunction() {
-		Path path = new Path(NORTH, new Section());
+		Path path = new Path(NORTH);
 
 		path.createPathLeft();
 		path.turnLeft();
@@ -94,12 +93,21 @@ public class PathTest {
 	
 	@Test
 	public void connect() {
-		Path path = new Path(NORTH, new Section());
-		Section section = new Section();
+		Path path = new Path(NORTH);
+		Section section = new Section(null);
 		path.connect(NORTH, section);
 		assertSame(section, path.getEnd().getNeighbour(NORTH));
 		assertSame(path.getEnd(), section.getNeighbour(SOUTH));
 
+	}
+	
+	@Test 
+	public void currentDirection()  {
+		Path path = new Path(NORTH);
+		assertEquals(NORTH, path.getCurrentDirection());
+		assertEquals(NORTH, path.ahead().getCurrentDirection());
+		assertEquals(WEST, path.turnLeft().getCurrentDirection());
+		assertEquals(NORTH, path.turnRight().getCurrentDirection());
 	}
 
 }

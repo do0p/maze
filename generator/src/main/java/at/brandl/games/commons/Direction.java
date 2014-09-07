@@ -1,4 +1,4 @@
-package at.brandl.maze.generator;
+package at.brandl.games.commons;
 
 public enum Direction {
 	NORTH, EAST, SOUTH, WEST;

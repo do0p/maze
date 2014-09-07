@@ -3,14 +3,21 @@ package at.brandl.maze.generator;
 import java.util.HashMap;
 import java.util.Map;
 
+import at.brandl.games.commons.Direction;
+
 public class Path {
 
 	public static class Section {
 
 		private final Map<Direction, Section> neighbours = new HashMap<Direction, Path.Section>();
-
+		private final Path path;
+		
+		Section(Path path)  {
+			this.path = path;
+		}
+		
 		private Section addNeighbour(Direction direction) {
-			return addNeighbour(direction, new Section());
+			return addNeighbour(direction, new Section(path));
 
 		}
 
@@ -29,12 +36,22 @@ public class Path {
 
 		}
 
+		public Path getPath() {
+			return path;
+		}
+
 	}
 
 	private final Section start;
 	private Section end;
 	private Direction currentDirection;
 
+	public Path(Direction startingDirection) {
+		currentDirection = startingDirection;
+		start = new Section(this);
+		end = start;
+	}
+	
 	public Path(Direction startingDirection, Section section) {
 		currentDirection = startingDirection;
 		start = section;
@@ -85,4 +102,9 @@ public class Path {
 
 	}
 
+	public Direction getCurrentDirection() {
+		return currentDirection;
+	}
+
+	
 }

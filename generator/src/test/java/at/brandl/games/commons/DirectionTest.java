@@ -1,8 +1,8 @@
-package at.brandl.maze.generator;
+package at.brandl.games.commons;
 
-import static at.brandl.maze.generator.Direction.*;
+import static at.brandl.games.commons.Direction.*;
+
 import org.junit.Assert;
-
 import org.junit.Test;
 
 public class DirectionTest {
