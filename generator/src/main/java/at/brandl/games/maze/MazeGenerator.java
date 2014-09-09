@@ -23,7 +23,7 @@ import at.brandl.games.maze.Path.Section;
 
 public class MazeGenerator {
 
-	private class NoPathFoundException extends RuntimeException {
+	public static class NoPathFoundException extends Exception {
 
 		public NoPathFoundException(String message) {
 			super(message);
@@ -39,7 +39,7 @@ public class MazeGenerator {
 	private final Random random;
 	private Field<Section> start;
 	private Field<Section> end;
-	private static final int MAX_TRIES = 1000000;
+	private static final int MAX_TRIES = 10000;
 
 	public MazeGenerator(Board<Section> board) {
 		this.board = board;
@@ -62,7 +62,7 @@ public class MazeGenerator {
 		}
 	}
 
-	public void generate() {
+	public void generate() throws NoPathFoundException {
 
 		// create solution path
 		Collection<Path> branches = createSolutionPath();
@@ -105,7 +105,7 @@ public class MazeGenerator {
 		}
 	}
 
-	private Queue<Path> createSolutionPath() {
+	private Queue<Path> createSolutionPath() throws NoPathFoundException {
 		int tries = 0;
 		Queue<Path> branches;
 		while (true) {

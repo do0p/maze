@@ -3,7 +3,7 @@ package at.brandl.games.maze;
 import org.junit.Test;
 
 import at.brandl.games.commons.Board;
-
+import at.brandl.games.maze.MazeGenerator.NoPathFoundException;
 import at.brandl.games.maze.Path.Section;
 
 public class MazeGeneratorTest {
@@ -12,7 +12,7 @@ public class MazeGeneratorTest {
 	private static final int COLUMNS = 40;
 
 	@Test
-	public void test() {
+	public void test() throws NoPathFoundException {
 		Board<Section> board = new Board<Section>(ROWS, COLUMNS);
 		MazeGenerator mazeGenerator = new MazeGenerator(board);
 		mazeGenerator.setStart(0, COLUMNS / 2);
