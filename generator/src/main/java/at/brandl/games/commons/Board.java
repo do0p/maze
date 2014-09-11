@@ -87,16 +87,23 @@ public class Board<T extends FieldContent<T>> {
 		}
 
 		public Map<Orientation, Field<T>> getNonEmptyNeighbours() {
+			return getNeighbours(false);
+		}
+		
+		public Map<Orientation, Field<T>> getEmptyNeighbours() {
+			return getNeighbours(true);
+		}
+
+		private Map<Orientation, Field<T>> getNeighbours(boolean empty) {
 			Map<Orientation, Field<T>> nonEmptyNeighbours = new HashMap<Orientation, Board.Field<T>>();
 			for (Entry<Orientation, Field<T>> entry : neighbours.entrySet()) {
 
-				if (!entry.getValue().isEmpty()) {
+				if (entry.getValue().isEmpty() == empty) {
 					nonEmptyNeighbours.put(entry.getKey(), entry.getValue());
 				}
 			}
 			return nonEmptyNeighbours;
 		}
-
 
 		private void addNeighbour(Orientation orientation, Field<T> field) {
 			Field<T> previous = neighbours.put(orientation, field);
@@ -107,6 +114,8 @@ public class Board<T extends FieldContent<T>> {
 			field.neighbours.put(orientation.opposite(), this);
 
 		}
+
+		
 
 	}
 

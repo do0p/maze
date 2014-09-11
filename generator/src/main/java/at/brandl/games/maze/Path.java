@@ -2,6 +2,7 @@ package at.brandl.games.maze;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Direction;
@@ -16,18 +17,23 @@ public class Path {
 
 	}
 
+	public static enum Target {
+		START, END
+	}
+
 	public static class Section implements FieldContent<Section> {
 
 		private final Map<Orientation, Section> neighbours = new HashMap<Orientation, Path.Section>();
-		private final Path path;
+		private final Map<Target, Section> targets = new HashMap<Target, Path.Section>();
+
 		private Field<Section> field;
 
-		Section(Path path) {
-			this.path = path;
+		Section() {
+
 		}
 
 		private Section addNeighbour(Orientation direction) {
-			return addNeighbour(direction, new Section(path));
+			return addNeighbour(direction, new Section());
 
 		}
 
@@ -37,6 +43,20 @@ public class Path {
 				throw new IllegalPathExcption();
 			}
 			section.neighbours.put(direction.opposite(), this);
+
+			for (Entry<Target, Section> entry : targets.entrySet()) {
+				if (section.targets.containsKey(entry)) {
+					throw new IllegalStateException(
+							"only one section can contain a given target");
+				}
+				section.setTarget(entry.getKey(), this);
+			}
+
+			for (Entry<Target, Section> entry : section.targets.entrySet()) {
+				if (!targets.containsKey(entry.getKey())) {
+					setTarget(entry.getKey(), section);
+				}
+			}
 			return section;
 
 		}
@@ -46,9 +66,6 @@ public class Path {
 
 		}
 
-		public Path getPath() {
-			return path;
-		}
 
 		public Field<Section> getField() {
 			return field;
@@ -57,11 +74,30 @@ public class Path {
 		@SuppressWarnings("unchecked")
 		public void setField(Field<? extends FieldContent<Section>> field) {
 			this.field = (Field<Section>) field;
-			
+
+		}
+
+		public Map<Orientation, Section> getNeighbours() {
+			return neighbours;
+		}
+		
+		public Section getTarget(Target target) {
+			return targets.get(target);
 		}
 
 
+		public void setTarget(Target target, Section section) {
+			targets.put(target, section);
+			for (Section neighbour : neighbours.values()) {
+				if (!neighbour.equals(section)) {
+					neighbour.setTarget(target, this);
+				}
+			}
+		}
 
+		public boolean hasTarget(Target target) {
+			return targets.containsKey(target) ;
+		}
 
 	}
 
@@ -69,16 +105,21 @@ public class Path {
 	private Section end;
 	private Orientation currentDirection;
 
+	
+	
 	public Path(Orientation startingDirection) {
-		currentDirection = startingDirection;
-		start = new Section(this);
-		end = start;
+		this(startingDirection, new Section());
 	}
 
-	public Path(Orientation startingDirection, Section section) {
-		currentDirection = startingDirection;
-		start = section;
-		end = start;
+	public Path(Orientation startingDirection, Section start) {
+		this(startingDirection, start, start);
+	}
+	
+	public Path(Orientation currentDirection, Section start, Section end) {
+		this.currentDirection = currentDirection;
+		this.start = start;
+		this.end = end;
+		
 	}
 
 	public Path go(Direction direction) {
@@ -108,6 +149,5 @@ public class Path {
 	public Orientation getCurrentDirection() {
 		return currentDirection;
 	}
-
 
 }

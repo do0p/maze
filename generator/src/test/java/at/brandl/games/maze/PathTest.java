@@ -20,7 +20,7 @@ public class PathTest {
 
 	@Test
 	public void start() {
-		Section first = new Section(null);
+		Section first = new Section();
 		Path path = new Path(NORTH, first);
 		assertSame(first, path.getStart());
 
@@ -30,7 +30,7 @@ public class PathTest {
 
 	@Test
 	public void end() {
-		Section first = new Section(null);
+		Section first = new Section();
 		Path path = new Path(NORTH, first);
 		assertSame(first, path.getEnd());
 
@@ -100,7 +100,7 @@ public class PathTest {
 	@Test
 	public void connect() {
 		Path path = new Path(NORTH);
-		Section section = new Section(null);
+		Section section = new Section();
 		path.connect(NORTH, section);
 		assertSame(section, path.getEnd().getNeighbour(NORTH));
 		assertSame(path.getEnd(), section.getNeighbour(SOUTH));
