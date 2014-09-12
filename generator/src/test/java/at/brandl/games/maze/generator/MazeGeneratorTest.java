@@ -1,7 +1,7 @@
-package at.brandl.games.maze;
+package at.brandl.games.maze.generator;
 
-import static at.brandl.games.maze.Path.Target.END;
-import static at.brandl.games.maze.Path.Target.START;
+import static at.brandl.games.maze.generator.Path.Target.END;
+import static at.brandl.games.maze.generator.Path.Target.START;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -13,9 +13,10 @@ import org.junit.Test;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Orientation;
-import at.brandl.games.maze.MazeGenerator.NoPathFoundException;
-import at.brandl.games.maze.Path.Section;
-import at.brandl.games.maze.Path.Target;
+import at.brandl.games.maze.generator.MazeGenerator;
+import at.brandl.games.maze.generator.MazeGenerator.NoPathFoundException;
+import at.brandl.games.maze.generator.Path.Section;
+import at.brandl.games.maze.generator.Path.Target;
 
 public class MazeGeneratorTest {
 

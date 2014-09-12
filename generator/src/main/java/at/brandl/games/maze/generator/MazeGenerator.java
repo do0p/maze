@@ -1,9 +1,10 @@
-package at.brandl.games.maze;
+package at.brandl.games.maze.generator;
 
 import static at.brandl.games.commons.Direction.AHEAD;
 import static at.brandl.games.commons.Direction.LEFT;
 import static at.brandl.games.commons.Direction.RIGHT;
-import static at.brandl.games.maze.Path.Target.*;
+import static at.brandl.games.maze.generator.Path.Target.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,8 +21,8 @@ import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Direction;
 import at.brandl.games.commons.Orientation;
-import at.brandl.games.maze.Path.Section;
-import at.brandl.games.maze.Path.Target;
+import at.brandl.games.maze.generator.Path.Section;
+import at.brandl.games.maze.generator.Path.Target;
 
 public class MazeGenerator {
 

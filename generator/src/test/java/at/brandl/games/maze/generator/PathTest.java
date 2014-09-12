@@ -1,4 +1,4 @@
-package at.brandl.games.maze;
+package at.brandl.games.maze.generator;
 
 import static at.brandl.games.commons.Direction.AHEAD;
 import static at.brandl.games.commons.Direction.LEFT;
@@ -13,8 +13,9 @@ import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
 
-import at.brandl.games.maze.Path.IllegalPathExcption;
-import at.brandl.games.maze.Path.Section;
+import at.brandl.games.maze.generator.Path;
+import at.brandl.games.maze.generator.Path.IllegalPathExcption;
+import at.brandl.games.maze.generator.Path.Section;
 
 public class PathTest {
 

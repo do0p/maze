@@ -1,4 +1,4 @@
-package at.brandl.games.maze;
+package at.brandl.games.maze.generator;
 
 import java.util.HashMap;
 import java.util.Map;

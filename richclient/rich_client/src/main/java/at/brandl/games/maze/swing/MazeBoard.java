@@ -1,4 +1,4 @@
-package at.brandl.games.maze;
+package at.brandl.games.maze.swing;
 
 import static at.brandl.games.commons.Orientation.EAST;
 import static at.brandl.games.commons.Orientation.NORTH;
@@ -30,8 +30,10 @@ import javax.swing.table.TableModel;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Orientation;
-import at.brandl.games.maze.MazeGenerator.NoPathFoundException;
-import at.brandl.games.maze.Path.Section;
+import at.brandl.games.maze.generator.MazeGenerator;
+import at.brandl.games.maze.generator.MazeGenerator.NoPathFoundException;
+import at.brandl.games.maze.generator.Path;
+import at.brandl.games.maze.generator.Path.Section;
 
 public class MazeBoard extends JFrame implements ChangeListener {
 
