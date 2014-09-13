@@ -23,9 +23,9 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
- 	<modules>
-		<module>../../generator</module>
-		<module>../../richclient/rich_client</module>
-		<module>../../android/android</module>
- 	</modules>
+
+	<modules>
+		<module>../generator</module>
+		<module>../swing</module>
+	</modules>
 </project>
