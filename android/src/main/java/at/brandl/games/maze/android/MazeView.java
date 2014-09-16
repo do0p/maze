@@ -36,10 +36,10 @@ public class MazeView extends View {
 	private static final int VISITED_FIELD_COLOR = Color.BLUE;
 	private static final int SUCCESS_FIELD_COLOR = Color.GREEN;
 	private static final int HORIZONTAL_PADDING = 10;
-	private static final int VERTICAL_PADDING = 240;
+	private static final int VERTICAL_PADDING = 65;
 
-	private static final int MAZE_WIDTH = 16;
-	private static final int MAZE_HEIGHT = 16;
+	private static final int MAZE_WIDTH = 18;
+	private static final int MAZE_HEIGHT = 24;
 	private static final int START_ROW = MAZE_HEIGHT - 1;
 	private static final int START_COLUMN = MAZE_WIDTH / 2;
 	private static final int END_ROW = 0;
