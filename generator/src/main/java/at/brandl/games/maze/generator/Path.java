@@ -99,6 +99,10 @@ public class Path {
 			return targets.containsKey(target) ;
 		}
 
+		public boolean hasNeighbour(Orientation orientation) {
+			return neighbours.containsKey(orientation);
+		}
+
 	}
 
 	private final Section start;

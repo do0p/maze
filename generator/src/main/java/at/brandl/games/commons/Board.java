@@ -40,6 +40,15 @@ public class Board<T extends FieldContent<T>> {
 		private final int row;
 		private final int column;
 		private T content;
+		private boolean visited;
+
+		public boolean isVisited() {
+			return visited;
+		}
+
+		public void setVisited(boolean visited) {
+			this.visited = visited;
+		}
 
 		private Field(int row, int column) {
 			this.row = row;
