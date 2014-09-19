@@ -4,6 +4,7 @@ import static at.brandl.games.commons.Orientation.EAST;
 import static at.brandl.games.commons.Orientation.NORTH;
 import static at.brandl.games.commons.Orientation.SOUTH;
 import static at.brandl.games.commons.Orientation.WEST;
+import static at.brandl.games.maze.generator.Path.Target.START;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,12 +17,12 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.maze.generator.MazeGenerator;
 import at.brandl.games.maze.generator.MazeGenerator.NoPathFoundException;
 import at.brandl.games.maze.generator.Path.Section;
-import static at.brandl.games.maze.generator.Path.Target.*;
 
 public class MazeView extends View {
 
@@ -35,29 +36,54 @@ public class MazeView extends View {
 	private static final int FIELD_COLOR = Color.WHITE;
 	private static final int VISITED_FIELD_COLOR = Color.BLUE;
 	private static final int SUCCESS_FIELD_COLOR = Color.GREEN;
-	private static final int HORIZONTAL_PADDING = 10;
-	private static final int VERTICAL_PADDING = 65;
 
-	private static final int MAZE_WIDTH = 18;
-	private static final int MAZE_HEIGHT = 24;
-	private static final int START_ROW = MAZE_HEIGHT - 1;
-	private static final int START_COLUMN = MAZE_WIDTH / 2;
-	private static final int END_ROW = 0;
-	private static final int END_COLUMN = START_COLUMN;
+	private static final float MAZE_RATIO = 1.2f;
 
 	private LayerDrawable layerDrawable;
 	private Board<Section> board;
 	private int size;
+	private int mazeSize;
 
+	private int mazeWidth;
+	private int mazeHeight;
+	private int startColumn;
+	private int startRow;
+	private int endColumn;
+	private int endRow;
+	private DisplayMetrics metrics;
 
-	public MazeView(Context context) {
+	public MazeView(Context context, int mazeSize) {
 		super(context);
+		this.mazeSize = mazeSize;
+		WindowManager wm = (WindowManager) context
+				.getSystemService(Context.WINDOW_SERVICE);
+		Display display = wm.getDefaultDisplay();
+		metrics = new DisplayMetrics();
+		display.getMetrics(metrics);
+		
+	
+		startBoard();
 
+	}
+
+	private void calcMazeSizes() {
+		mazeWidth = mazeSize;
+		mazeHeight = (int) (mazeWidth * MAZE_RATIO);
+		startColumn = mazeWidth / 2;
+		startRow = mazeHeight - 1;
+		endColumn = startColumn;
+		endRow = 0;
+	}
+
+	private void startBoard() {
+		calcMazeSizes();
+		size = calcFieldSize();
+		setLayoutParams(new FrameLayout.LayoutParams(size * mazeWidth, size * mazeHeight));
 		board = createBoard();
-		size = calcFieldSize(context);
 		layerDrawable = new LayerDrawable(createShapes());
 
 	}
+
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -90,7 +116,7 @@ public class MazeView extends View {
 			Field<Section> boardField = board.getField(row, column);
 			if (!boardField.isVisited()) {
 				boolean update = false;
-				
+
 				if (isStart(boardField)) {
 					update = true;
 				} else {
@@ -106,17 +132,18 @@ public class MazeView extends View {
 				}
 				if (update) {
 					boardField.setVisited(true);
-					if(isEnd(boardField)){
-						Section section ;
+					if (isEnd(boardField)) {
+						Section section;
 						Section nextSection = boardField.getContent();
 						do {
 							section = nextSection;
 							Field<Section> field = section.getField();
-							updateField(field.getRow(), field.getColumn(), SUCCESS_FIELD_COLOR);
+							updateField(field.getRow(), field.getColumn(),
+									SUCCESS_FIELD_COLOR);
 							nextSection = section.getTarget(START);
-						} while(!nextSection.equals(section));
-					}else{
-					updateField(row, column, VISITED_FIELD_COLOR);
+						} while (!nextSection.equals(section));
+					} else {
+						updateField(row, column, VISITED_FIELD_COLOR);
 					}
 					return true;
 				}
@@ -132,11 +159,11 @@ public class MazeView extends View {
 	}
 
 	private boolean isEnd(Field<Section> field) {
-		return field.getColumn() == END_COLUMN && field.getRow() == END_ROW;
+		return field.getColumn() == endColumn && field.getRow() == endRow;
 	}
 
 	private boolean isStart(Field<Section> field) {
-		return field.getColumn() == START_COLUMN && field.getRow() == START_ROW;
+		return field.getColumn() == startColumn && field.getRow() == startRow;
 	}
 
 	private ShapeDrawable getField(int row, int column) {
@@ -147,13 +174,13 @@ public class MazeView extends View {
 	}
 
 	private int calcColumn(float x) {
-		int column = calcField(x - HORIZONTAL_PADDING);
-		return column >= 0 && column < MAZE_WIDTH ? column : -1;
+		int column = calcField(x);
+		return column >= 0 && column < mazeWidth ? column : -1;
 	}
 
 	private int calcRow(float y) {
-		int row = calcField(y - VERTICAL_PADDING);
-		return row >= 0 && row < MAZE_HEIGHT ? row : -1;
+		int row = calcField(y);
+		return row >= 0 && row < mazeHeight ? row : -1;
 	}
 
 	private int calcField(float v) {
@@ -161,21 +188,21 @@ public class MazeView extends View {
 	}
 
 	private int calcFieldIndex(int row, int column) {
-		if (row >= 0 && row < MAZE_HEIGHT && column >= 0 && column < MAZE_WIDTH) {
-			return row * MAZE_WIDTH + column + 1;
+		if (row >= 0 && row < mazeHeight && column >= 0 && column < mazeWidth) {
+			return row * mazeWidth + column + 1;
 		}
 		return -1;
 	}
 
 	private ShapeDrawable[] createShapes() {
-		int numShapes = MAZE_WIDTH * MAZE_HEIGHT + 1;
+		int numShapes = mazeWidth * mazeHeight + 1;
 		ShapeDrawable[] rectangles = new ShapeDrawable[numShapes];
 
 		int i = 0;
 		rectangles[i++] = createBackground();
 
-		for (int row = 0; row < MAZE_HEIGHT; row++) {
-			for (int column = 0; column < MAZE_WIDTH; column++) {
+		for (int row = 0; row < mazeHeight; row++) {
+			for (int column = 0; column < mazeWidth; column++) {
 				rectangles[i++] = createField(row, column, FIELD_COLOR);
 			}
 		}
@@ -183,13 +210,13 @@ public class MazeView extends View {
 	}
 
 	private ShapeDrawable createBackground() {
-		return drawRectangle(HORIZONTAL_PADDING, VERTICAL_PADDING, MAZE_WIDTH
-				* size, MAZE_HEIGHT * size, BORDER_COLOR, 0);
+		return drawRectangle(0, 0, mazeWidth * size, mazeHeight * size,
+				BORDER_COLOR, 0);
 	}
 
 	private ShapeDrawable createField(int row, int column, int color) {
-		int left = HORIZONTAL_PADDING + column * size;
-		int top = VERTICAL_PADDING + row * size;
+		int left = column * size;
+		int top = row * size;
 
 		Field<Section> field = board.getField(row, column);
 		ShapeDrawable rectangle = drawRectangle(left, top, size, size, color,
@@ -199,28 +226,23 @@ public class MazeView extends View {
 	}
 
 	protected void onDraw(Canvas canvas) {
+
 		layerDrawable.draw(canvas);
 	}
 
-	private int calcFieldSize(Context context) {
-		WindowManager wm = (WindowManager) context
-				.getSystemService(Context.WINDOW_SERVICE);
-		Display display = wm.getDefaultDisplay();
-		DisplayMetrics metrics = new DisplayMetrics();
-		display.getMetrics(metrics);
+	private int calcFieldSize() {
 
-		int width = (metrics.widthPixels - 2 * HORIZONTAL_PADDING) / MAZE_WIDTH;
-		int height = (metrics.heightPixels - 2 * VERTICAL_PADDING)
-				/ MAZE_HEIGHT;
+		int width = metrics.widthPixels / mazeWidth;
+		int height = metrics.heightPixels / mazeHeight;
 
 		return Math.min(width, height);
 	}
 
 	private Board<Section> createBoard() {
-		Board<Section> board = new Board<Section>(MAZE_WIDTH, MAZE_HEIGHT);
+		Board<Section> board = new Board<Section>(mazeWidth, mazeHeight);
 		MazeGenerator mazeGenerator = new MazeGenerator(board);
-		mazeGenerator.setStart(START_ROW, START_COLUMN);
-		mazeGenerator.setEnd(END_ROW, END_COLUMN);
+		mazeGenerator.setStart(startRow, startColumn);
+		mazeGenerator.setEnd(endRow, endColumn);
 		try {
 			mazeGenerator.generate();
 		} catch (NoPathFoundException e) {
@@ -272,6 +294,15 @@ public class MazeView extends View {
 
 	private boolean border(int borders, int border) {
 		return (border & borders) == border;
+	}
+
+	public void restart() {
+		startBoard();
+		
+	}
+
+	public void setMazeSize(int mazeSize) {
+		this.mazeSize = mazeSize;
 	}
 
 }

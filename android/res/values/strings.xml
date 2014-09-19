@@ -3,7 +3,5 @@
 
     <string name="app_name">Maze</string>
     <string name="title_activity_maze_board">MazeBoard</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>
