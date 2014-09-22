@@ -12,11 +12,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
-
 public class Board<T extends FieldContent<T>> {
-	
-
 
 	public static class FieldNotFoundException extends RuntimeException {
 
@@ -66,7 +62,7 @@ public class Board<T extends FieldContent<T>> {
 		public void clear() {
 			content = null;
 		}
-		
+
 		public void setContent(T content) {
 			if (!isEmpty()) {
 				throw new IllegalStateException(
@@ -89,7 +85,6 @@ public class Board<T extends FieldContent<T>> {
 			return column;
 		}
 
-
 		public Map<Orientation, Field<T>> getNeighbours() {
 
 			return neighbours;
@@ -98,7 +93,7 @@ public class Board<T extends FieldContent<T>> {
 		public Map<Orientation, Field<T>> getNonEmptyNeighbours() {
 			return getNeighbours(false);
 		}
-		
+
 		public Map<Orientation, Field<T>> getEmptyNeighbours() {
 			return getNeighbours(true);
 		}
@@ -123,8 +118,6 @@ public class Board<T extends FieldContent<T>> {
 			field.neighbours.put(orientation.opposite(), this);
 
 		}
-
-		
 
 	}
 
@@ -184,7 +177,7 @@ public class Board<T extends FieldContent<T>> {
 		if (field.getColumn() == fields.get(0).size() - 1) {
 			borders.add(EAST);
 		}
-		
+
 		if (field.getRow() == fields.size() - 1) {
 			borders.add(SOUTH);
 		}
@@ -195,7 +188,6 @@ public class Board<T extends FieldContent<T>> {
 		return borders;
 	}
 
-
 	public void clear() {
 		for (Map<Integer, Field<T>> row : fields.values()) {
 			for (Field<T> field : row.values()) {
@@ -204,18 +196,28 @@ public class Board<T extends FieldContent<T>> {
 		}
 	}
 
+	public Collection<Field<T>> getFields() {
+
+		Collection<Field<T>> allFields = new LinkedList<Board.Field<T>>();
+		for (Map<Integer, Field<T>> row : fields.values()) {
+			for (Field<T> field : row.values()) {
+				allFields.add(field);
+			}
+		}
+		return allFields;
+	}
+
 	public Collection<Field<T>> getEmptyFields() {
-		
+
 		Collection<Field<T>> emptyFields = new LinkedList<Board.Field<T>>();
 		for (Map<Integer, Field<T>> row : fields.values()) {
 			for (Field<T> field : row.values()) {
-				if(field.isEmpty()) {
+				if (field.isEmpty()) {
 					emptyFields.add(field);
 				}
 			}
 		}
 		return emptyFields;
 	}
-	
 
 }

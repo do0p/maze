@@ -26,7 +26,7 @@ import at.brandl.games.maze.generator.Path.Target;
 
 public class MazeGenerator {
 
-	private static final int AVERAGE_NUMBER_SECTIONS_TO_NEXT_BRANCH = 5;
+	private static final int AVERAGE_NUMBER_SECTIONS_TO_NEXT_BRANCH = 10;
 
 	public static class NoPathFoundException extends Exception {
 

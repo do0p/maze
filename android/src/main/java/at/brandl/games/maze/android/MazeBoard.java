@@ -1,10 +1,14 @@
 package at.brandl.games.maze.android;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.ToggleButton;
 import at.brandl.games.maze.android.util.SystemUiHider;
 
 /**
@@ -13,8 +17,8 @@ import at.brandl.games.maze.android.util.SystemUiHider;
  * 
  * @see SystemUiHider
  */
-public class MazeBoard extends Activity implements
-		OnSeekBarChangeListener {
+public class MazeBoard extends Activity implements OnSeekBarChangeListener,
+		OnClickListener {
 
 	private static final int DEFAULT_MAZE_SIZE = 12;
 	private static final int MIN_MAZE_SIZE = 5;
@@ -31,27 +35,41 @@ public class MazeBoard extends Activity implements
 		final ViewGroup viewContainer = (ViewGroup) findViewById(R.id.view_container);
 		viewContainer.addView(mazeView);
 
-//		final Button startButton = (Button) findViewById(R.id.start_button);
-//		startButton.setOnClickListener(this);
+		final ToggleButton lightSwitch = (ToggleButton) findViewById(R.id.light_switch);
+		lightSwitch.setChecked(true);
+		lightSwitch.setOnClickListener(this);
 
 		final SeekBar mazeSizeBar = (SeekBar) findViewById(R.id.maze_size_bar);
 		mazeSizeBar.setProgress(calcLevel(DEFAULT_MAZE_SIZE));
 		mazeSizeBar.setOnSeekBarChangeListener(this);
+		mazeSizeBar.setOnClickListener(this);
 
 	}
 
-//	@Override
-//	public void onClick(View v) {
-//		if (v.getId() == R.id.start_button) {
-//			mazeView.restart();
-//		}
-//	}
+	@Override
+	public void onClick(View v) {
+		int viewId = v.getId();
+		if (viewId == R.id.maze_size_bar) {
+			mazeView.restart();
+		} else if (viewId == R.id.light_switch) {
+			ToggleButton lightSwitch = (ToggleButton) findViewById(R.id.light_switch);
+			if (lightSwitch.isChecked()) {
+				mazeView.setFieldColor(Color.WHITE);
+			} else {
+				mazeView.setFieldColor(Color.BLACK);
+			}
+			mazeView.invalidate();
+		}
+	}
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
-			boolean fromUser) {}
+			boolean fromUser) {
+	}
+
 	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {}
+	public void onStartTrackingTouch(SeekBar seekBar) {
+	}
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
@@ -64,9 +82,10 @@ public class MazeBoard extends Activity implements
 
 		return MIN_MAZE_SIZE + level * (MAX_MAZE_SIZE - MIN_MAZE_SIZE) / 100;
 	}
-	
+
 	private int calcLevel(int mazeSize) {
-		return (mazeSize - MIN_MAZE_SIZE) * 100 / (MAX_MAZE_SIZE - MIN_MAZE_SIZE);
+		return (mazeSize - MIN_MAZE_SIZE) * 100
+				/ (MAX_MAZE_SIZE - MIN_MAZE_SIZE);
 	}
 
 }

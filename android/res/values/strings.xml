@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Maze</string>
-    <string name="title_activity_maze_board">MazeBoard</string>
+    <string name="title_activity_maze_board">Labyrinth</string>
+    <string name="light">Licht</string>
 
 </resources>

@@ -33,7 +33,7 @@ public class MazeView extends View {
 
 	private static final int BORDER_WIDTH = 5;
 	private static final int BORDER_COLOR = Color.BLACK;
-	private static final int FIELD_COLOR = Color.WHITE;
+	private static final int DEFAULT_FIELD_COLOR = Color.WHITE;
 	private static final int VISITED_FIELD_COLOR = Color.BLUE;
 	private static final int SUCCESS_FIELD_COLOR = Color.GREEN;
 
@@ -51,6 +51,7 @@ public class MazeView extends View {
 	private int endColumn;
 	private int endRow;
 	private DisplayMetrics metrics;
+	private int fieldColor = DEFAULT_FIELD_COLOR;
 
 	public MazeView(Context context, int mazeSize) {
 		super(context);
@@ -81,7 +82,8 @@ public class MazeView extends View {
 		setLayoutParams(new FrameLayout.LayoutParams(size * mazeWidth, size * mazeHeight));
 		board = createBoard();
 		layerDrawable = new LayerDrawable(createShapes());
-
+		updateField(startRow, startColumn, VISITED_FIELD_COLOR);
+		updateField(endRow, endColumn, SUCCESS_FIELD_COLOR);
 	}
 
 
@@ -124,7 +126,7 @@ public class MazeView extends View {
 					Section section = boardField.getContent();
 
 					for (Section neighbour : section.getNeighbours().values()) {
-						if (neighbour.getField().isVisited()) {
+						if (neighbour.getField() != null && neighbour.getField().isVisited()) {
 							update = true;
 							break;
 						}
@@ -157,7 +159,7 @@ public class MazeView extends View {
 		Paint paint = viewField.getPaint();
 		paint.setColor(color);
 	}
-
+	
 	private boolean isEnd(Field<Section> field) {
 		return field.getColumn() == endColumn && field.getRow() == endRow;
 	}
@@ -203,7 +205,7 @@ public class MazeView extends View {
 
 		for (int row = 0; row < mazeHeight; row++) {
 			for (int column = 0; column < mazeWidth; column++) {
-				rectangles[i++] = createField(row, column, FIELD_COLOR);
+				rectangles[i++] = createField(row, column, fieldColor);
 			}
 		}
 		return rectangles;
@@ -246,7 +248,7 @@ public class MazeView extends View {
 		try {
 			mazeGenerator.generate();
 		} catch (NoPathFoundException e) {
-			throw new RuntimeException(e);
+			return createBoard();
 		}
 		return board;
 	}
@@ -303,6 +305,16 @@ public class MazeView extends View {
 
 	public void setMazeSize(int mazeSize) {
 		this.mazeSize = mazeSize;
+	}
+	
+	public void setFieldColor(int color) {
+		fieldColor = color;
+		for(Field<Section>	field : board.getFields()) {
+			if(!field.isVisited() && !isEnd(field) && !isStart(field)) {
+				updateField(field.getRow(), field.getColumn(), fieldColor);
+			}
+		}
+
 	}
 
 }

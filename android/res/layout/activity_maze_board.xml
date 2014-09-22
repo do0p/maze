@@ -11,17 +11,27 @@
     -->
 
     <LinearLayout
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="#000000"
         android:orientation="vertical" >
 
+        <ToggleButton 
+            android:id="@+id/light_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textOff="@string/light"
+            android:textOn="@string/light"/>
+        
         <FrameLayout
             android:id="@+id/view_container"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp" 
+            android:layout_marginBottom="18dp"/>
 
         <SeekBar
             android:id="@+id/maze_size_bar"
