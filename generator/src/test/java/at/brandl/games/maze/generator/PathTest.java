@@ -118,4 +118,14 @@ public class PathTest {
 
 	}
 
+	@Test
+	public void equals() {
+		Path path = new Path(NORTH);
+		path.go(AHEAD);
+		assertEquals(path, path);
+		
+		Path other = new Path(SOUTH, path.getEnd(), path.getStart());
+		assertEquals(path, other);
+	}
+	
 }

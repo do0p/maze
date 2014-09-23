@@ -3,17 +3,18 @@ package at.brandl.games.maze.generator;
 import static at.brandl.games.commons.Direction.AHEAD;
 import static at.brandl.games.commons.Direction.LEFT;
 import static at.brandl.games.commons.Direction.RIGHT;
-import static at.brandl.games.maze.generator.Path.Target.*;
+import static at.brandl.games.maze.generator.Path.Target.END;
+import static at.brandl.games.maze.generator.Path.Target.START;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -22,23 +23,15 @@ import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Direction;
 import at.brandl.games.commons.Orientation;
 import at.brandl.games.maze.generator.Path.Section;
-import at.brandl.games.maze.generator.Path.Target;
 
 public class MazeGenerator {
 
-	private static final int AVERAGE_NUMBER_SECTIONS_TO_NEXT_BRANCH = 10;
+	private int averageNumberOfStepsToNextBranch = 15;
 
-	public static class NoPathFoundException extends Exception {
 
-		public NoPathFoundException(String message) {
-			super(message);
-		}
-
-		private static final long serialVersionUID = 7071070037078290539L;
-
-	}
-
-	private List<Direction> turns = Arrays.asList(LEFT, AHEAD, RIGHT);
+	private final List<Direction> turns = Arrays.asList(LEFT, AHEAD, RIGHT);
+	private final Map<Path, Integer> pathLengths = new HashMap<>();
+	private final HashSet<Section> endpoints = new HashSet<>();
 
 	private final Board<Section> board;
 	private final Random random;
@@ -47,60 +40,118 @@ public class MazeGenerator {
 
 	public MazeGenerator(Board<Section> board) {
 		this.board = board;
+		start = board.getField(0, 0);
 		random = new Random(System.currentTimeMillis());
 	}
 
-	public void setStart(int row, int column) {
-		start = board.getField(row, column);
-		if (board.getBorders(start).isEmpty()) {
-			throw new IllegalArgumentException("row " + row + " and column "
-					+ column + " not on border");
-		}
+	public int getAverageNumberOfStepsToNextBranch() {
+		return averageNumberOfStepsToNextBranch;
 	}
 
-	public void setEnd(int row, int column) {
-		end = board.getField(row, column);
-		if (board.getBorders(end).isEmpty()) {
-			throw new IllegalArgumentException("row " + row + " and column "
-					+ column + " not on border");
-		}
+	public void setAverageNumberOfStepsToNextBranch(
+			int averageNumberOfStepsToNextBranch) {
+		this.averageNumberOfStepsToNextBranch = averageNumberOfStepsToNextBranch;
 	}
 
-	public void generate() throws NoPathFoundException {
+	
 
-		// create solution path
+	public Field<Section> getStart() {
+		return start;
+	}
+
+	public Field<Section> getEnd() {
+		return end;
+	}
+
+
+
+	public void generate()  {
+
 		Collection<Path> branches = createSolutionPath();
 
-		// create branches
 		createBranches(branches);
 
-		// fill empty spots
 		fillEmptyFields(branches);
+
+		setLongestPath();
+
+	}
+
+	private void setLongestPath() {
+		findAllEndpoints();
+		Path longestPath = findLongestPath();
+		setStartAndEnd(longestPath);
+	}
+
+	private void setStartAndEnd(Path longestPath) {
+		Section startSection = longestPath.getStart();
+		startSection.setTarget(START, startSection);
+		start = startSection.getField();
+		Section endSection = longestPath.getEnd();
+		endSection.setTarget(END, endSection);
+		end = longestPath.getEnd().getField();
+	}
+
+	private Path findLongestPath() {
+		Iterator<Section> iterator = endpoints.iterator();
+		Path longestPath = new Path(Orientation.NORTH, start.getContent());
+		while (iterator.hasNext()) {
+			Section startPoint = iterator.next();
+			iterator.remove();
+			for (Section endPoint : endpoints) {
+
+				Path path = new Path(Orientation.NORTH, startPoint, endPoint);
+				if (pathLengths.containsKey(path)) {
+					continue;
+				}
+				startPoint.setTarget(START, startPoint);
+				Section target = endPoint.getTarget(START);
+				int length = 0;
+				while (!target.equals(startPoint)) {
+					length++;
+					target = target.getTarget(START);
+				}
+				path.setLength(length);
+				if (length > longestPath.getLength()) {
+					longestPath = path;
+				}
+			}
+		}
+		return longestPath;
+	}
+
+	private void findAllEndpoints() {
+		for (Field<Section> field : board.getFields()) {
+			Section section = field.getContent();
+			if (section.getNeighbours().size() == 1) {
+				endpoints.add(section);
+			}
+		}
 	}
 
 	private void fillEmptyFields(Collection<Path> branches) {
-		
+
 		Iterator<Field<Section>> iterator = board.getEmptyFields().iterator();
 		while (iterator.hasNext()) {
-			
+
 			Field<Section> field = iterator.next();
 			Map<Orientation, Field<Section>> nonEmptyNeighbours = field
 					.getNonEmptyNeighbours();
 			if (!nonEmptyNeighbours.isEmpty()) {
-				
+
 				Entry<Orientation, Field<Section>> neighbour = nonEmptyNeighbours
 						.entrySet().iterator().next();
 				Path path = new Path(neighbour.getKey().opposite());
 				field.setContent(path.getStart());
 				path.connect(neighbour.getKey(), neighbour.getValue()
 						.getContent());
-				
+
 				boolean advanced = false;
 				do {
 					advanced = advance(path, branches);
 					createBranches(branches);
 				} while (advanced);
-				
+
 				iterator = board.getEmptyFields().iterator();
 			}
 		}
@@ -119,68 +170,18 @@ public class MazeGenerator {
 		}
 	}
 
-	private Collection<Path> createSolutionPath() throws NoPathFoundException {
+	private Collection<Path> createSolutionPath()  {
 
-		Queue<Path> startPaths = initPath(start, START);
-		Queue<Path> endPaths = initPath(end, END);
-
-		boolean solutionFound = false;
-
-		do {
-			Path startPath = startPaths.poll();
-			Path endPath = endPaths.poll();
-
-			boolean advanced;
-			do {
-				advanced = false;
-				if (advance(startPath, startPaths)) {
-					advanced = true;
-					if (tryConnect(startPath, END)) {
-						solutionFound = true;
-						break;
-					}
-				}
-
-				if (advance(endPath, endPaths)) {
-					advanced = true;
-					if (tryConnect(endPath, START)) {
-						solutionFound = true;
-						break;
-					}
-				}
-
-			} while (advanced);
-
-		} while (!(solutionFound || (startPaths.isEmpty() && endPaths.isEmpty())));
-		if (!solutionFound) {
-			throw new NoPathFoundException("no path found");
-		}
-
-		return merge(startPaths, endPaths);
+		Path path = new Path(Orientation.EAST);
+		start.setContent(path.getStart());
+		ConcurrentLinkedQueue<Path> concurrentLinkedQueue = new ConcurrentLinkedQueue<Path>();
+		concurrentLinkedQueue.add(path);
+		return concurrentLinkedQueue;
+		
+	
 	}
 
-	private ConcurrentLinkedQueue<Path> merge(Queue<Path> startPaths,
-			Queue<Path> endPaths) {
-		List<Path> allPath = new ArrayList<Path>();
-		allPath.addAll(startPaths);
-		allPath.addAll(endPaths);
-		Collections.shuffle(allPath);
-		return new ConcurrentLinkedQueue<Path>(allPath);
-	}
-
-	private Queue<Path> initPath(Field<Section> field, Target target) {
-		Orientation borderOrientation = board.getBorders(field).iterator()
-				.next();
-		Path path = new Path(borderOrientation.opposite()).go(AHEAD);
-		Section section = path.getEnd();
-		section.setTarget(target, section);
-		field.setContent(section);
-
-		Queue<Path> startPaths = new ConcurrentLinkedQueue<Path>();
-		startPaths.add(path);
-		return startPaths;
-	}
-
+	
 	private boolean advance(Path path, Collection<Path> branches) {
 
 		if (path == null) {
@@ -217,27 +218,9 @@ public class MazeGenerator {
 	}
 
 	private boolean branchingTime() {
-		return random.nextInt(AVERAGE_NUMBER_SECTIONS_TO_NEXT_BRANCH) == 0;
+		return random.nextInt(averageNumberOfStepsToNextBranch) == 0;
 	}
 
-	private boolean tryConnect(Path path, Target target) {
-
-		Map<Orientation, Field<Section>> nonEmptyNeighbours = path.getEnd()
-				.getField().getNonEmptyNeighbours();
-		if (!nonEmptyNeighbours.isEmpty()) {
-			Iterator<Entry<Orientation, Field<Section>>> iterator = nonEmptyNeighbours
-					.entrySet().iterator();
-			while (iterator.hasNext()) {
-				Entry<Orientation, Field<Section>> neighbour = iterator.next();
-
-				Section neighbourSection = neighbour.getValue().getContent();
-				if (neighbourSection.hasTarget(target)) {
-					path.connect(neighbour.getKey(), neighbourSection);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+	
 
 }

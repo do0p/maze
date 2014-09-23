@@ -13,8 +13,6 @@ import org.junit.Test;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Orientation;
-import at.brandl.games.maze.generator.MazeGenerator;
-import at.brandl.games.maze.generator.MazeGenerator.NoPathFoundException;
 import at.brandl.games.maze.generator.Path.Section;
 import at.brandl.games.maze.generator.Path.Target;
 
@@ -32,17 +30,18 @@ public class MazeGeneratorTest {
 		void assertSection(Section section);
 	}
 
-	private static final int ROWS = 40;
-	private static final int COLUMNS = 40;
+	private static final int ROWS = 24;
+	private static final int COLUMNS = 28;
 	private Board<Section> board;
+	private MazeGenerator mazeGenerator;
 
 	@Before
-	public void setUp() throws NoPathFoundException {
-		board = new Board<Section>(ROWS, COLUMNS);
-		MazeGenerator mazeGenerator = new MazeGenerator(board);
-		mazeGenerator.setStart(0, COLUMNS / 2);
-		mazeGenerator.setEnd(ROWS - 1, COLUMNS / 2);
+	public void setUp() {
+
+		board = new Board<Section>(COLUMNS, ROWS);
+		mazeGenerator = new MazeGenerator(board);
 		mazeGenerator.generate();
+
 	}
 
 	@Test
@@ -155,8 +154,7 @@ public class MazeGeneratorTest {
 			public void assertSection(Section section) {
 
 				Field<Section> startField = getFinalTarget(section, START);
-				assertEquals(0, startField.getRow());
-				assertEquals(COLUMNS / 2, startField.getColumn());
+				assertEquals(mazeGenerator.getStart(), startField);
 
 			}
 		});
@@ -168,8 +166,7 @@ public class MazeGeneratorTest {
 			public void assertSection(Section section) {
 
 				Field<Section> endField = getFinalTarget(section, END);
-				assertEquals(ROWS - 1, endField.getRow());
-				assertEquals(COLUMNS / 2, endField.getColumn());
+				assertEquals(mazeGenerator.getEnd(), endField);
 
 			}
 

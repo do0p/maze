@@ -31,7 +31,6 @@ import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.commons.Orientation;
 import at.brandl.games.maze.generator.MazeGenerator;
-import at.brandl.games.maze.generator.MazeGenerator.NoPathFoundException;
 import at.brandl.games.maze.generator.Path;
 import at.brandl.games.maze.generator.Path.Section;
 
@@ -46,7 +45,7 @@ public class MazeBoard extends JFrame implements ChangeListener {
 	private static final int MIN_MAZE_SIZE = 10;
 	private static final int MAX_MAZE_SIZE = 50;
 	private static final int DEFAULT_MAZE_SIZE = 15;
-	
+
 	private static int mazeSize = DEFAULT_MAZE_SIZE;
 
 	private static class MazeCellRenderer implements TableCellRenderer {
@@ -58,7 +57,7 @@ public class MazeBoard extends JFrame implements ChangeListener {
 			Field<Section> content = (Field<Section>) value;
 			JComponent cell = new Box(BoxLayout.LINE_AXIS);
 			cell.setBorder(createBorder(content.getContent()));
-			cell.setSize(MazeBoard.getFieldSize() , getFieldSize());
+			cell.setSize(MazeBoard.getFieldSize(), getFieldSize());
 			return cell;
 		}
 
@@ -76,8 +75,6 @@ public class MazeBoard extends JFrame implements ChangeListener {
 			return section.getNeighbour(orientation) != null ? 0 : BORDER_WIDTH;
 		}
 
-	
-
 	}
 
 	public static void main(String args[]) {
@@ -88,7 +85,7 @@ public class MazeBoard extends JFrame implements ChangeListener {
 
 	public MazeBoard() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		
+
 		box = createBox();
 		add(box);
 
@@ -108,10 +105,10 @@ public class MazeBoard extends JFrame implements ChangeListener {
 		layoutTable(table);
 		return table;
 	}
-	
+
 	public void stateChanged(ChangeEvent event) {
-		JSlider source = (JSlider)event.getSource();
-		if(!source.getValueIsAdjusting()){
+		JSlider source = (JSlider) event.getSource();
+		if (!source.getValueIsAdjusting()) {
 			mazeSize = source.getValue();
 			JTable maze = createMaze();
 			box.remove(0);
@@ -124,7 +121,8 @@ public class MazeBoard extends JFrame implements ChangeListener {
 		Box box = new Box(BoxLayout.PAGE_AXIS);
 		box.setBorder(BorderFactory.createEmptyBorder(MARGIN, MARGIN, MARGIN,
 				MARGIN));
-		JSlider difficulty = new JSlider(MIN_MAZE_SIZE, MAX_MAZE_SIZE, DEFAULT_MAZE_SIZE);
+		JSlider difficulty = new JSlider(MIN_MAZE_SIZE, MAX_MAZE_SIZE,
+				DEFAULT_MAZE_SIZE);
 		difficulty.addChangeListener(this);
 		box.add(difficulty);
 		return box;
@@ -144,7 +142,6 @@ public class MazeBoard extends JFrame implements ChangeListener {
 		table.setRowHeight(getFieldSize());
 		table.setDefaultRenderer(Object.class, new MazeCellRenderer());
 
-		
 		return table;
 	}
 
@@ -158,19 +155,13 @@ public class MazeBoard extends JFrame implements ChangeListener {
 		}
 		table.doLayout();
 	}
-	
+
 	private TableModel createDataModel() {
 		TableModel dataModel = new DefaultTableModel(mazeSize, mazeSize);
 		Board<Section> board = new Board<Path.Section>(mazeSize, mazeSize);
 		MazeGenerator mazeGenerator = new MazeGenerator(board);
 
-		mazeGenerator.setStart(0, mazeSize / 2);
-		mazeGenerator.setEnd(mazeSize - 1, mazeSize / 2);
-		try {
-			mazeGenerator.generate();
-		} catch (NoPathFoundException e) {
-			System.exit(1);
-		}
+		mazeGenerator.generate();
 
 		for (int row = 0; row < mazeSize; row++) {
 			for (int column = 0; column < mazeSize; column++) {
@@ -179,10 +170,9 @@ public class MazeBoard extends JFrame implements ChangeListener {
 		}
 		return dataModel;
 	}
-	
+
 	private static int getFieldSize() {
 		return BOARD_SIZE / mazeSize;
 	}
-
 
 }

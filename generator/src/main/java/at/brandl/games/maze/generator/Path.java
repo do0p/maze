@@ -66,7 +66,6 @@ public class Path {
 
 		}
 
-
 		public Field<Section> getField() {
 			return field;
 		}
@@ -80,11 +79,10 @@ public class Path {
 		public Map<Orientation, Section> getNeighbours() {
 			return neighbours;
 		}
-		
+
 		public Section getTarget(Target target) {
 			return targets.get(target);
 		}
-
 
 		public void setTarget(Target target, Section section) {
 			targets.put(target, section);
@@ -96,7 +94,7 @@ public class Path {
 		}
 
 		public boolean hasTarget(Target target) {
-			return targets.containsKey(target) ;
+			return targets.containsKey(target);
 		}
 
 		public boolean hasNeighbour(Orientation orientation) {
@@ -107,10 +105,18 @@ public class Path {
 
 	private final Section start;
 	private Section end;
+	private int length;
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
 	private Orientation currentDirection;
 
-	
-	
 	public Path(Orientation startingDirection) {
 		this(startingDirection, new Section());
 	}
@@ -118,12 +124,12 @@ public class Path {
 	public Path(Orientation startingDirection, Section start) {
 		this(startingDirection, start, start);
 	}
-	
+
 	public Path(Orientation currentDirection, Section start, Section end) {
 		this.currentDirection = currentDirection;
 		this.start = start;
 		this.end = end;
-		
+
 	}
 
 	public Path go(Direction direction) {
@@ -152,6 +158,28 @@ public class Path {
 
 	public Orientation getCurrentDirection() {
 		return currentDirection;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + end.hashCode();
+		result = prime * result + start.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Path)) {
+			return false;
+		}
+		Path other = (Path) obj;
+		return (start.equals(other.start) && end.equals(other.end))
+				|| (end.equals(other.start) && start.equals(other.end));
 	}
 
 }

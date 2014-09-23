@@ -7,7 +7,6 @@ import static at.brandl.games.commons.Orientation.WEST;
 import static at.brandl.games.maze.generator.Path.Target.START;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -21,28 +20,43 @@ import android.widget.FrameLayout;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
 import at.brandl.games.maze.generator.MazeGenerator;
-import at.brandl.games.maze.generator.MazeGenerator.NoPathFoundException;
 import at.brandl.games.maze.generator.Path.Section;
 
 public class MazeView extends View {
+
+	public static interface Configuration {
+		int getBorderWidth();
+
+		int getBorderColor();
+
+		int getFieldColor();
+
+		int getVisitedFieldColor();
+
+		int getSuccessFieldColor();
+
+		float getMazeRatio();
+
+		int getMazeSize();
+
+	}
 
 	private static final int TOP_BORDER = 1;
 	private static final int RIGHT_BORDER = 2;
 	private static final int BOTTOM_BORDER = 4;
 	private static final int LEFT_BORDER = 8;
 
-	private static final int BORDER_WIDTH = 5;
-	private static final int BORDER_COLOR = Color.BLACK;
-	private static final int DEFAULT_FIELD_COLOR = Color.WHITE;
-	private static final int VISITED_FIELD_COLOR = Color.BLUE;
-	private static final int SUCCESS_FIELD_COLOR = Color.GREEN;
-
-	private static final float MAZE_RATIO = 1.2f;
+	private int borderWidth;
+	private int borderColor;
+	private int fieldColor;
+	private int visitedFieldColor;
+	private int successFieldColor;
+	private float mazeRatio;
+	private int mazeSize;
 
 	private LayerDrawable layerDrawable;
 	private Board<Section> board;
 	private int size;
-	private int mazeSize;
 
 	private int mazeWidth;
 	private int mazeHeight;
@@ -50,26 +64,31 @@ public class MazeView extends View {
 	private int startRow;
 	private int endColumn;
 	private int endRow;
-	private DisplayMetrics metrics;
-	private int fieldColor = DEFAULT_FIELD_COLOR;
 
-	public MazeView(Context context, int mazeSize) {
+	private DisplayMetrics metrics;
+
+	public MazeView(Context context, Configuration config) {
 		super(context);
-		this.mazeSize = mazeSize;
+		this.mazeSize = config.getMazeSize();
+		this.borderWidth = config.getBorderWidth();
+		this.borderColor = config.getBorderColor();
+		this.fieldColor = config.getFieldColor();
+		this.visitedFieldColor = config.getVisitedFieldColor();
+		this.successFieldColor = config.getSuccessFieldColor();
+		this.mazeRatio = config.getMazeRatio();
 		WindowManager wm = (WindowManager) context
 				.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		metrics = new DisplayMetrics();
 		display.getMetrics(metrics);
-		
-	
+
 		startBoard();
 
 	}
 
 	private void calcMazeSizes() {
 		mazeWidth = mazeSize;
-		mazeHeight = (int) (mazeWidth * MAZE_RATIO);
+		mazeHeight = (int) (mazeWidth * mazeRatio);
 		startColumn = mazeWidth / 2;
 		startRow = mazeHeight - 1;
 		endColumn = startColumn;
@@ -79,13 +98,13 @@ public class MazeView extends View {
 	private void startBoard() {
 		calcMazeSizes();
 		size = calcFieldSize();
-		setLayoutParams(new FrameLayout.LayoutParams(size * mazeWidth, size * mazeHeight));
+		setLayoutParams(new FrameLayout.LayoutParams(size * mazeWidth, size
+				* mazeHeight));
 		board = createBoard();
 		layerDrawable = new LayerDrawable(createShapes());
-		updateField(startRow, startColumn, VISITED_FIELD_COLOR);
-		updateField(endRow, endColumn, SUCCESS_FIELD_COLOR);
+		updateField(startRow, startColumn, visitedFieldColor);
+		updateField(endRow, endColumn, successFieldColor);
 	}
-
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -126,7 +145,8 @@ public class MazeView extends View {
 					Section section = boardField.getContent();
 
 					for (Section neighbour : section.getNeighbours().values()) {
-						if (neighbour.getField() != null && neighbour.getField().isVisited()) {
+						if (neighbour.getField() != null
+								&& neighbour.getField().isVisited()) {
 							update = true;
 							break;
 						}
@@ -141,11 +161,11 @@ public class MazeView extends View {
 							section = nextSection;
 							Field<Section> field = section.getField();
 							updateField(field.getRow(), field.getColumn(),
-									SUCCESS_FIELD_COLOR);
+									successFieldColor);
 							nextSection = section.getTarget(START);
 						} while (!nextSection.equals(section));
 					} else {
-						updateField(row, column, VISITED_FIELD_COLOR);
+						updateField(row, column, visitedFieldColor);
 					}
 					return true;
 				}
@@ -159,7 +179,7 @@ public class MazeView extends View {
 		Paint paint = viewField.getPaint();
 		paint.setColor(color);
 	}
-	
+
 	private boolean isEnd(Field<Section> field) {
 		return field.getColumn() == endColumn && field.getRow() == endRow;
 	}
@@ -213,7 +233,7 @@ public class MazeView extends View {
 
 	private ShapeDrawable createBackground() {
 		return drawRectangle(0, 0, mazeWidth * size, mazeHeight * size,
-				BORDER_COLOR, 0);
+				borderColor, 0);
 	}
 
 	private ShapeDrawable createField(int row, int column, int color) {
@@ -243,13 +263,15 @@ public class MazeView extends View {
 	private Board<Section> createBoard() {
 		Board<Section> board = new Board<Section>(mazeWidth, mazeHeight);
 		MazeGenerator mazeGenerator = new MazeGenerator(board);
-		mazeGenerator.setStart(startRow, startColumn);
-		mazeGenerator.setEnd(endRow, endColumn);
-		try {
-			mazeGenerator.generate();
-		} catch (NoPathFoundException e) {
-			return createBoard();
-		}
+
+		mazeGenerator.generate();
+
+		Field<Section> start = mazeGenerator.getStart();
+		startRow = start.getRow();
+		startColumn = start.getColumn();
+		Field<Section> end = mazeGenerator.getEnd();
+		endRow = end.getRow();
+		endColumn = end.getColumn();
 		return board;
 	}
 
@@ -274,18 +296,18 @@ public class MazeView extends View {
 			int height, int color, int borders) {
 
 		if (border(borders, TOP_BORDER)) {
-			top += BORDER_WIDTH;
-			height -= BORDER_WIDTH;
+			top += borderWidth;
+			height -= borderWidth;
 		}
 		if (border(borders, RIGHT_BORDER)) {
-			width -= BORDER_WIDTH;
+			width -= borderWidth;
 		}
 		if (border(borders, BOTTOM_BORDER)) {
-			height -= BORDER_WIDTH;
+			height -= borderWidth;
 		}
 		if (border(borders, LEFT_BORDER)) {
-			left += BORDER_WIDTH;
-			width -= BORDER_WIDTH;
+			left += borderWidth;
+			width -= borderWidth;
 		}
 
 		ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
@@ -300,17 +322,17 @@ public class MazeView extends View {
 
 	public void restart() {
 		startBoard();
-		
+
 	}
 
 	public void setMazeSize(int mazeSize) {
 		this.mazeSize = mazeSize;
 	}
-	
-	public void setFieldColor(int color) {
+
+	public void changeFieldColor(int color) {
 		fieldColor = color;
-		for(Field<Section>	field : board.getFields()) {
-			if(!field.isVisited() && !isEnd(field) && !isStart(field)) {
+		for (Field<Section> field : board.getFields()) {
+			if (!field.isVisited() && !isEnd(field) && !isStart(field)) {
 				updateField(field.getRow(), field.getColumn(), fieldColor);
 			}
 		}
