@@ -66,6 +66,7 @@ public class MazeView extends View {
 	private int endRow;
 
 	private DisplayMetrics metrics;
+	private boolean gameOver;
 
 	public MazeView(Context context, Configuration config) {
 		super(context);
@@ -104,10 +105,15 @@ public class MazeView extends View {
 		layerDrawable = new LayerDrawable(createShapes());
 		updateField(startRow, startColumn, visitedFieldColor);
 		updateField(endRow, endColumn, successFieldColor);
+		gameOver = false;
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+
+		if (gameOver) {
+			return true;
+		}
 
 		boolean updated = false;
 		if (MotionEvent.ACTION_MOVE == event.getAction()
@@ -155,6 +161,7 @@ public class MazeView extends View {
 				if (update) {
 					boardField.setVisited(true);
 					if (isEnd(boardField)) {
+						gameOver = true;
 						Section section;
 						Section nextSection = boardField.getContent();
 						do {
