@@ -28,7 +28,6 @@ public class MazeGenerator {
 
 	private int averageNumberOfStepsToNextBranch = 15;
 
-
 	private final List<Direction> turns = Arrays.asList(LEFT, AHEAD, RIGHT);
 	private final Map<Path, Integer> pathLengths = new HashMap<>();
 	private final HashSet<Section> endpoints = new HashSet<>();
@@ -37,6 +36,8 @@ public class MazeGenerator {
 	private final Random random;
 	private Field<Section> start;
 	private Field<Section> end;
+	
+	private volatile float progressPcnt = 0;
 
 	public MazeGenerator(Board<Section> board) {
 		this.board = board;
@@ -53,8 +54,6 @@ public class MazeGenerator {
 		this.averageNumberOfStepsToNextBranch = averageNumberOfStepsToNextBranch;
 	}
 
-	
-
 	public Field<Section> getStart() {
 		return start;
 	}
@@ -63,9 +62,7 @@ public class MazeGenerator {
 		return end;
 	}
 
-
-
-	public void generate()  {
+	public void generate() {
 
 		Collection<Path> branches = createSolutionPath();
 
@@ -93,8 +90,13 @@ public class MazeGenerator {
 	}
 
 	private Path findLongestPath() {
+		
+		int numEndpoints = endpoints.size();
+		int numPaths = numEndpoints * (numEndpoints - 1) / 2;
+		
 		Iterator<Section> iterator = endpoints.iterator();
 		Path longestPath = new Path(Orientation.NORTH, start.getContent());
+		int progress = 0;
 		while (iterator.hasNext()) {
 			Section startPoint = iterator.next();
 			iterator.remove();
@@ -115,6 +117,8 @@ public class MazeGenerator {
 				if (length > longestPath.getLength()) {
 					longestPath = path;
 				}
+				
+				progressPcnt = ++progress / numPaths;
 			}
 		}
 		return longestPath;
@@ -170,18 +174,16 @@ public class MazeGenerator {
 		}
 	}
 
-	private Collection<Path> createSolutionPath()  {
+	private Collection<Path> createSolutionPath() {
 
 		Path path = new Path(Orientation.EAST);
 		start.setContent(path.getStart());
 		ConcurrentLinkedQueue<Path> concurrentLinkedQueue = new ConcurrentLinkedQueue<Path>();
 		concurrentLinkedQueue.add(path);
 		return concurrentLinkedQueue;
-		
-	
+
 	}
 
-	
 	private boolean advance(Path path, Collection<Path> branches) {
 
 		if (path == null) {
@@ -221,6 +223,8 @@ public class MazeGenerator {
 		return random.nextInt(averageNumberOfStepsToNextBranch) == 0;
 	}
 
-	
+	public float getProgressPcnt() {
+		return progressPcnt * 100;
+	}
 
 }

@@ -12,6 +12,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
 	</properties>
 
 	<dependencyManagement>
@@ -29,4 +31,17 @@
 		<module>../swing</module>
 		<module>../android</module>
 	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<target>${maven.compiler.target}</target>
+					<source>${maven.compiler.source}</source>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
