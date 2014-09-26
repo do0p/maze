@@ -29,6 +29,7 @@ import at.brandl.games.maze.generator.Path.Section;
 public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 		OnClickListener {
 
+	private static final int AVERAGE_PATH_LENGTH = 25;
 	private static final int BORDER_WIDTH = 5;
 	private static final int BORDER_COLOR = Color.BLACK;
 	private static final int FIELD_COLOR = Color.WHITE;
@@ -183,6 +184,8 @@ public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 			Board<Section> board = new Board<Section>(mazeSize,
 					(int) (mazeSize * MAZE_RATIO));
 			MazeGenerator generator = new MazeGenerator(board);
+	
+			generator.setAverageNumberOfStepsToNextBranch(AVERAGE_PATH_LENGTH);
 			generator.addProgressListener(this);
 			generator.generate();
 			return board;
