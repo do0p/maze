@@ -1,8 +1,7 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:orientation="vertical" >
+    android:background="#000000" >
 
     <!--
          The primary full-screen view. This can be replaced with whatever view
@@ -11,27 +10,28 @@
     -->
 
     <LinearLayout
-        android:layout_marginTop="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:layout_gravity="center"
+        android:layout_marginTop="15dp"
         android:background="#000000"
         android:orientation="vertical" >
 
-        <ToggleButton 
+        <ToggleButton
             android:id="@+id/light_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textOff="@string/light"
-            android:textOn="@string/light"/>
-        
+            android:textOn="@string/light" />
+
         <FrameLayout
             android:id="@+id/view_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp" 
-            android:layout_marginBottom="15dp"/>
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp" />
 
         <SeekBar
             android:id="@+id/maze_size_bar"
@@ -39,7 +39,40 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:max="100" />
-        
     </LinearLayout>
 
-</LinearLayout>
+   <RelativeLayout
+        android:id="@+id/view_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.8"
+            android:background="#000000" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="#000000"
+            android:orientation="vertical"
+            android:padding="20dp" >
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/loading" />
+        </LinearLayout>
+     </RelativeLayout>
+
+</RelativeLayout>

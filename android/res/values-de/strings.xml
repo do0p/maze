@@ -4,5 +4,6 @@
     <string name="app_name">Maze</string>
     <string name="title_activity_maze_board">Labyrinth</string>
     <string name="light">Licht</string>
+    <string name="loading">wird geladen ...</string>
 
 </resources>

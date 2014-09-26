@@ -6,6 +6,7 @@ import static at.brandl.games.commons.Direction.RIGHT;
 import static at.brandl.games.maze.generator.Path.Target.END;
 import static at.brandl.games.maze.generator.Path.Target.START;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,10 @@ import at.brandl.games.maze.generator.Path.Section;
 
 public class MazeGenerator {
 
+	public static interface ProgressListener {
+		public void updateProgress(int progress);
+	}
+	
 	private int averageNumberOfStepsToNextBranch = 15;
 
 	private final List<Direction> turns = Arrays.asList(LEFT, AHEAD, RIGHT);
@@ -37,7 +42,9 @@ public class MazeGenerator {
 	private Field<Section> start;
 	private Field<Section> end;
 	
-	private volatile float progressPcnt = 0;
+	private volatile int progressPcnt = 0;
+
+	private Collection<ProgressListener> listeners = new ArrayList<>();
 
 	public MazeGenerator(Board<Section> board) {
 		this.board = board;
@@ -74,6 +81,10 @@ public class MazeGenerator {
 
 	}
 
+	public void addProgressListener(ProgressListener listener) {
+		listeners .add(listener);
+	}
+	
 	private void setLongestPath() {
 		findAllEndpoints();
 		Path longestPath = findLongestPath();
@@ -84,9 +95,12 @@ public class MazeGenerator {
 		Section startSection = longestPath.getStart();
 		startSection.setTarget(START, startSection);
 		start = startSection.getField();
+		board.setStart(start);
+		
 		Section endSection = longestPath.getEnd();
 		endSection.setTarget(END, endSection);
 		end = longestPath.getEnd().getField();
+		board.setEnd(end);
 	}
 
 	private Path findLongestPath() {
@@ -118,7 +132,8 @@ public class MazeGenerator {
 					longestPath = path;
 				}
 				
-				progressPcnt = ++progress / numPaths;
+				progressPcnt = ++progress * 100 / numPaths;
+				notifyProgress(progressPcnt);
 			}
 		}
 		return longestPath;
@@ -223,8 +238,14 @@ public class MazeGenerator {
 		return random.nextInt(averageNumberOfStepsToNextBranch) == 0;
 	}
 
-	public float getProgressPcnt() {
-		return progressPcnt * 100;
+	public int getProgressPcnt() {
+		return progressPcnt;
+	}
+	
+	private void notifyProgress(int progress) {
+		for(ProgressListener listener : listeners) {
+			listener.updateProgress(progress);
+		}
 	}
 
 }

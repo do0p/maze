@@ -122,12 +122,18 @@ public class Board<T extends FieldContent<T>> {
 	}
 
 	private final Map<Integer, Map<Integer, Field<T>>> fields = new HashMap<Integer, Map<Integer, Field<T>>>();
+	private final int width;
+	private final int height;
+	private Field<T> start;
+	private Field<T> end;
 
-	public Board(int numColumns, int numRows) {
+	public Board(int width, int height) {
 
-		for (int row = 0; row < numRows; row++) {
+		this.width = width;
+		this.height = height;
+		for (int row = 0; row < height; row++) {
 			Map<Integer, Field<T>> rowValues = new HashMap<Integer, Board.Field<T>>();
-			for (int column = 0; column < numColumns; column++) {
+			for (int column = 0; column < width; column++) {
 				Field<T> field = new Field<T>(row, column);
 				if (column > 0) {
 					field.addNeighbour(WEST, rowValues.get(column - 1));
@@ -220,4 +226,29 @@ public class Board<T extends FieldContent<T>> {
 		return emptyFields;
 	}
 
+	public Field<T> getStart() {
+		return start;
+	}
+
+	public void setStart(Field<T> start) {
+		this.start = start;
+	}
+
+	public Field<T> getEnd() {
+		return end;
+	}
+
+	public void setEnd(Field<T> end) {
+		this.end = end;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	
 }

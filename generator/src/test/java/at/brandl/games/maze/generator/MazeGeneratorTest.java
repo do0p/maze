@@ -175,7 +175,7 @@ public class MazeGeneratorTest {
 
 	@Test
 	public void progress() {
-		assertEquals(100f, mazeGenerator.getProgressPcnt(), 0);
+		assertEquals(100, mazeGenerator.getProgressPcnt());
 	}
 	
 	private void forEeachRowAndColumn(RowAndColumnAsserter asserter) {

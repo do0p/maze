@@ -2,16 +2,23 @@ package at.brandl.games.maze.android;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ToggleButton;
+import at.brandl.games.commons.Board;
 import at.brandl.games.maze.android.MazeView.Configuration;
 import at.brandl.games.maze.android.util.SystemUiHider;
+import at.brandl.games.maze.generator.MazeGenerator;
+import at.brandl.games.maze.generator.MazeGenerator.ProgressListener;
+import at.brandl.games.maze.generator.Path.Section;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -32,14 +39,16 @@ public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 
 	private static final int MIN_MAZE_SIZE = 5;
 	private static final int MAX_MAZE_SIZE = 24;
+
 	private MazeView mazeView;
+	private int mazeSize = DEFAULT_MAZE_SIZE;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-	    this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
 		setContentView(R.layout.activity_maze_board);
 
 		mazeView = new MazeView(getBaseContext(), new Configuration() {
@@ -79,6 +88,8 @@ public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 				return BORDER_COLOR;
 			}
 		});
+		createBoard();
+
 		final ViewGroup viewContainer = (ViewGroup) findViewById(R.id.view_container);
 		viewContainer.addView(mazeView);
 
@@ -87,7 +98,7 @@ public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 		lightSwitch.setOnClickListener(this);
 
 		final SeekBar mazeSizeBar = (SeekBar) findViewById(R.id.maze_size_bar);
-		mazeSizeBar.setProgress(calcLevel(DEFAULT_MAZE_SIZE));
+		mazeSizeBar.setProgress(calcLevel());
 		mazeSizeBar.setOnSeekBarChangeListener(this);
 		mazeSizeBar.setOnClickListener(this);
 
@@ -95,9 +106,10 @@ public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 
 	@Override
 	public void onClick(View v) {
+
 		int viewId = v.getId();
 		if (viewId == R.id.maze_size_bar) {
-			mazeView.restart();
+			createBoard();
 		} else if (viewId == R.id.light_switch) {
 			ToggleButton lightSwitch = (ToggleButton) findViewById(R.id.light_switch);
 			if (lightSwitch.isChecked()) {
@@ -121,18 +133,80 @@ public class MazeBoard extends Activity implements OnSeekBarChangeListener,
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		int level = seekBar.getProgress();
-		mazeView.setMazeSize(calcMazeSize(level));
-		mazeView.restart();
+		calcMazeSize(level);
+		createBoard();
 	}
 
-	private int calcMazeSize(int level) {
+	private void calcMazeSize(int level) {
 
-		return MIN_MAZE_SIZE + level * (MAX_MAZE_SIZE - MIN_MAZE_SIZE) / 100;
+		mazeSize = MIN_MAZE_SIZE + level * (MAX_MAZE_SIZE - MIN_MAZE_SIZE)
+				/ 100;
 	}
 
-	private int calcLevel(int mazeSize) {
+	private int calcLevel() {
 		return (mazeSize - MIN_MAZE_SIZE) * 100
 				/ (MAX_MAZE_SIZE - MIN_MAZE_SIZE);
 	}
 
+	private void createBoard() {
+
+		new GenerateTask().execute();
+
+	}
+
+	private class GenerateTask extends AsyncTask<Void, Integer, Board<Section>>
+			implements ProgressListener {
+
+		private ViewGroup progressView;
+		private ProgressBar progressBar;
+		private ToggleButton lightSwitch;
+		private SeekBar mazeSizeBar;
+
+		private GenerateTask() {
+			this.progressView = (ViewGroup) findViewById(R.id.view_progress);
+			this.progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+			this.lightSwitch = (ToggleButton) findViewById(R.id.light_switch);
+			this.mazeSizeBar = (SeekBar) findViewById(R.id.maze_size_bar);
+
+		}
+
+		@Override
+		protected void onPreExecute() {
+			lightSwitch.setEnabled(false);
+			mazeSizeBar.setEnabled(false);
+			progressBar.setProgress(0);
+			progressView.setVisibility(RelativeLayout.VISIBLE);
+		}
+
+		@Override
+		protected Board<Section> doInBackground(Void... params) {
+			Board<Section> board = new Board<Section>(mazeSize,
+					(int) (mazeSize * MAZE_RATIO));
+			MazeGenerator generator = new MazeGenerator(board);
+			generator.addProgressListener(this);
+			generator.generate();
+			return board;
+		}
+
+		@Override
+		protected void onPostExecute(Board<Section> result) {
+			final ViewGroup viewContainer = (ViewGroup) findViewById(R.id.view_container);
+			MazeView mazeView = (MazeView) viewContainer.getChildAt(0);
+			mazeView.setBoard(result);
+			progressView.setVisibility(View.INVISIBLE);
+			lightSwitch.setEnabled(true);
+			mazeSizeBar.setEnabled(true);
+		}
+
+		@Override
+		public void updateProgress(int progress) {
+			publishProgress(progress);
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+	}
 }

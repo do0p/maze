@@ -19,7 +19,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import at.brandl.games.commons.Board;
 import at.brandl.games.commons.Board.Field;
-import at.brandl.games.maze.generator.MazeGenerator;
 import at.brandl.games.maze.generator.Path.Section;
 
 public class MazeView extends View {
@@ -51,8 +50,6 @@ public class MazeView extends View {
 	private int fieldColor;
 	private int visitedFieldColor;
 	private int successFieldColor;
-	private float mazeRatio;
-	private int mazeSize;
 
 	private LayerDrawable layerDrawable;
 	private Board<Section> board;
@@ -60,51 +57,47 @@ public class MazeView extends View {
 
 	private int mazeWidth;
 	private int mazeHeight;
-	private int startColumn;
-	private int startRow;
-	private int endColumn;
-	private int endRow;
 
 	private DisplayMetrics metrics;
 	private boolean gameOver;
+	private Field<Section> start;
+	private Field<Section> end;
 
 	public MazeView(Context context, Configuration config) {
 		super(context);
-		this.mazeSize = config.getMazeSize();
+
 		this.borderWidth = config.getBorderWidth();
 		this.borderColor = config.getBorderColor();
 		this.fieldColor = config.getFieldColor();
 		this.visitedFieldColor = config.getVisitedFieldColor();
 		this.successFieldColor = config.getSuccessFieldColor();
-		this.mazeRatio = config.getMazeRatio();
+		getDisplayMetrics(context);
+
+	}
+
+	private void getDisplayMetrics(Context context) {
 		WindowManager wm = (WindowManager) context
 				.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		metrics = new DisplayMetrics();
 		display.getMetrics(metrics);
-
-		startBoard();
-
 	}
 
 	private void calcMazeSizes() {
-		mazeWidth = mazeSize;
-		mazeHeight = (int) (mazeWidth * mazeRatio);
-		startColumn = mazeWidth / 2;
-		startRow = mazeHeight - 1;
-		endColumn = startColumn;
-		endRow = 0;
+
+		int width = metrics.widthPixels / mazeWidth;
+		int height = metrics.heightPixels / mazeHeight;
+		size = Math.min(width, height);
 	}
 
-	private void startBoard() {
-		calcMazeSizes();
-		size = calcFieldSize();
+	private void drawBoard() {
+
 		setLayoutParams(new FrameLayout.LayoutParams(size * mazeWidth, size
 				* mazeHeight));
-		board = createBoard();
+
 		layerDrawable = new LayerDrawable(createShapes());
-		updateField(startRow, startColumn, visitedFieldColor);
-		updateField(endRow, endColumn, successFieldColor);
+		updateField(start, visitedFieldColor);
+		updateField(end, successFieldColor);
 		gameOver = false;
 	}
 
@@ -167,12 +160,11 @@ public class MazeView extends View {
 						do {
 							section = nextSection;
 							Field<Section> field = section.getField();
-							updateField(field.getRow(), field.getColumn(),
-									successFieldColor);
+							updateField(field, successFieldColor);
 							nextSection = section.getTarget(START);
 						} while (!nextSection.equals(section));
 					} else {
-						updateField(row, column, visitedFieldColor);
+						updateField(boardField, visitedFieldColor);
 					}
 					return true;
 				}
@@ -181,18 +173,18 @@ public class MazeView extends View {
 		return false;
 	}
 
-	private void updateField(int row, int column, int color) {
-		ShapeDrawable viewField = getField(row, column);
+	private void updateField(Field<Section> field, int color) {
+		ShapeDrawable viewField = getField(field.getRow(), field.getColumn());
 		Paint paint = viewField.getPaint();
 		paint.setColor(color);
 	}
 
 	private boolean isEnd(Field<Section> field) {
-		return field.getColumn() == endColumn && field.getRow() == endRow;
+		return end.equals(field);
 	}
 
 	private boolean isStart(Field<Section> field) {
-		return field.getColumn() == startColumn && field.getRow() == startRow;
+		return start.equals(field);
 	}
 
 	private ShapeDrawable getField(int row, int column) {
@@ -255,31 +247,20 @@ public class MazeView extends View {
 	}
 
 	protected void onDraw(Canvas canvas) {
-
-		layerDrawable.draw(canvas);
+		if (layerDrawable != null) {
+			layerDrawable.draw(canvas);
+		}
 	}
 
-	private int calcFieldSize() {
+	public void setBoard(Board<Section> board) {
+		this.board = board;
+		mazeWidth = board.getWidth();
+		mazeHeight = board.getHeight();
+		start = board.getStart();
+		end = board.getEnd();
 
-		int width = metrics.widthPixels / mazeWidth;
-		int height = metrics.heightPixels / mazeHeight;
-
-		return Math.min(width, height);
-	}
-
-	private Board<Section> createBoard() {
-		Board<Section> board = new Board<Section>(mazeWidth, mazeHeight);
-		MazeGenerator mazeGenerator = new MazeGenerator(board);
-
-		mazeGenerator.generate();
-
-		Field<Section> start = mazeGenerator.getStart();
-		startRow = start.getRow();
-		startColumn = start.getColumn();
-		Field<Section> end = mazeGenerator.getEnd();
-		endRow = end.getRow();
-		endColumn = end.getColumn();
-		return board;
+		calcMazeSizes();
+		drawBoard();
 	}
 
 	private int calcBorders(Section section) {
@@ -327,20 +308,11 @@ public class MazeView extends View {
 		return (border & borders) == border;
 	}
 
-	public void restart() {
-		startBoard();
-
-	}
-
-	public void setMazeSize(int mazeSize) {
-		this.mazeSize = mazeSize;
-	}
-
 	public void changeFieldColor(int color) {
 		fieldColor = color;
 		for (Field<Section> field : board.getFields()) {
 			if (!field.isVisited() && !isEnd(field) && !isStart(field)) {
-				updateField(field.getRow(), field.getColumn(), fieldColor);
+				updateField(field, fieldColor);
 			}
 		}
 

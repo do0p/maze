@@ -1,3 +1,4 @@
+
 package at.brandl.games.maze.swing;
 
 import static at.brandl.games.commons.Orientation.EAST;
